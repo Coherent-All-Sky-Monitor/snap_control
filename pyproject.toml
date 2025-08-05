@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "snap_control"
+version = "0.1.0"
+description = "Utility scripts and configs for configuring multiple CASM SNAP boards"
+authors = ["Liam Connor <liam.connor@cfa.harvard.edu>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "multi_snap_config.py" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+#casm_f = "*"      # The CASM SNAP F‑engine Python interface (>=1.0.0)
+PyYAML = "^6.0"
+
+[tool.poetry.dev-dependencies]
+black = "^24.3"
+isort = "^5.13"
+pytest = "^8.1"
+pre-commit = "^3.6"
+
+[tool.poetry.scripts]
+multi-snap-config = "multi_snap_config:main"
+
+[build-system]
+requires = ["poetry-core>=1.8"]
+build-backend = "poetry.core.masonry.api"
