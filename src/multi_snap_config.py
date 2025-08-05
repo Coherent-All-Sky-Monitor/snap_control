@@ -17,34 +17,6 @@ boards described in a YAML configuration file:
    NIC(s) and frequency ranges.
 5. Prints a concise per‑board status summary (GB/s, packet‑rate, error flags).
 
-The YAML file schema
---------------------
-Example – *casm_feng_layout.yaml*::
-
-    boards:
-      - host: snap01                       # Hostname or IP of the SNAP
-        feng_id: 0                        # Board‑ID written into packet headers
-        fpgfile: /boffiles/casm_v1_20250508.fpg
-        source:                            # 10‑GbE source parameters *for this board*
-          ip: 10.10.0.1
-          port: 10000
-          mac: 00:25:90:c2:b1:a0          # Either hex‑int or colon notation is fine
-        destinations:                      # One entry per corner‑turn target
-          - ip: 10.20.0.10
-            port: 13000
-            mac: 00:25:90:c2:b1:b0
-            start_chan: 0                 # First 4‑bit channel index (0‑4095)
-            nchan: 512                    # Must be multiple of nchan_packet
-            nic: eth0                     # Which downstream NIC handles this range
-            freq_range_mhz: [375.0, 386.25]
-          - ip: 10.20.0.11
-            port: 13000
-            mac: 00:25:90:c2:b1:b1
-            start_chan: 512
-            nchan: 512
-            nic: eth0
-            freq_range_mhz: [386.25, 397.5]
-
 The top‑level key **boards** is a list so you can describe any number of SNAPs.
 
 Usage
@@ -142,6 +114,7 @@ def _configure_board(board_def: dict, nchan_packet: int) -> None:
                 "nchan": int(dest["nchan"]),
             }
         )
+    return macs, dests
 
     LOGGER.info("Connecting to %s …", host)
     feng = snap_fengine.SnapFengine(host)

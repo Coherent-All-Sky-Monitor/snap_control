@@ -1,46 +1,271 @@
-boards:
-  - host: snap01                       # Hostname or IP of the SNAP
-    feng_id: 0                        # Board-ID inserted into packet headers
-    fpgfile: /boffiles/casm_v1_20250508.fpg
-    source:                           # 10‑GbE source NIC on the SNAP
-      ip: 10.10.0.1
-      port: 10000
-      mac: 00:25:90:c2:b1:a0         # Can also be given as 0x002590C2B1A0
-    destinations:                    # One entry per corner‑turn target
-      - ip: 10.20.0.10
-        port: 13000
-        mac: 00:25:90:c2:b1:b0
-        start_chan: 0               # First 4‑bit channel index (0‑4095)
-        nchan: 512                  # Must be multiple of nchan_packet
-        nic: eth0                   # Which downstream NIC carries this range
-        freq_range_mhz: [375.0, 386.25]
-      - ip: 10.20.0.11
-        port: 13000
-        mac: 00:25:90:c2:b1:b1
-        start_chan: 512
-        nchan: 512
-        nic: eth0
-        freq_range_mhz: [386.25, 397.5]
+# casm_feng_layout.yaml — simplified schema with shared defaults
+# ---------------------------------------------------------------------------
+# Global / common settings that apply to *every* SNAP board in the array.
+# Only board‑unique fields (host/IP/MAC/feng_id) live under `boards:`.
+# ---------------------------------------------------------------------------
 
-  - host: snap02
+common:
+  fpgfile: /home/user/software/casm_snap_f/firmware/snap_f_12i_4kc/outputs/snap_f_12i_4kc_2025-05-08_1446.fpg'    # Bitstream programmed to every board
+  source_port: 10000                         # UDP source port on all SNAPs
+  dest_port: 13000                           # UDP destination port on all targets
+  nic: eth0                                  # Down‑stream 10‑GbE NIC name (identical for all boards)
+  nchan: 512                                 # Channels each board streams per destination
+  nchan_packet: 512                          # Channels per UDP packet
+  destinations:                              # Corner‑turn targets shared by all boards
+    - ip: 192.168.100.3
+      mac: c4:70:bd:74:2e:3c
+      server: casm-server-01
+      nic_name: ens1006f0np0
+      start_chan: 0
+      freq_range_mhz: [375.0, 386.25]
+    - ip: 192.168.100.4
+      mac: c4:70:bd:74:2e:3d
+      server: casm-server-01
+      nic_name: ens1006f1np1
+      start_chan: 512
+      freq_range_mhz: [386.25, 397.5]
+    - ip: 192.168.100.5
+      mac: c4:70:bd:4f:99:11
+      server: casm-server-01
+      nic_name: ens4013f1np1
+      start_chan: 1024
+      freq_range_mhz: [386.25, 397.5]
+    - ip: 192.168.100.6
+      mac: xx:xx:xx:xx:xx:xx
+      server: casm-server-02
+      nic_name: ens1006f0np0
+      start_chan: 1536
+      freq_range_mhz: [375.0, 386.25]
+    - ip: 192.168.100.7
+      mac: xx:xx:xx:xx:xx:xx
+      server: casm-server-02
+      nic_name: ens1006f1np1
+      start_chan: 2048
+      freq_range_mhz: [386.25, 397.5]
+    - ip: 192.168.100.8
+      mac: xx:xx:xx:xx:xx:xx
+      server: casm-server-02
+      nic_name: ens4013f1np1
+      start_chan: 2560
+      freq_range_mhz: [386.25, 397.5]
+
+# ------------------------
+# Per‑board configuration 
+# ------------------------
+boards:
+  - name: snap01
+    host: snap01                 # Hostname or management IP of the RPi/KATCP
+    source_ip: 10.10.0.1         # 10‑GbE source IP on this SNAP
+    source_mac: 00:25:90:c2:b1:a0
+    feng_id: 0
+  - name: snap02
+    host: snap02
+    source_ip: 10.10.0.2
+    source_mac: 00:25:90:c2:b1:a1
     feng_id: 1
-    fpgfile: /boffiles/casm_v1_20250508.fpg
-    source:
-      ip: 10.10.0.2
-      port: 10000
-      mac: 0x002590C2B1A1
-    destinations:
-      - ip: 10.20.0.12
-        port: 13000
-        mac: 0x002590C2B1C0
-        start_chan: 1024
-        nchan: 512
-        nic: eth0
-        freq_range_mhz: [397.5, 408.75]
-      - ip: 10.20.0.13
-        port: 13000
-        mac: 0x002590C2B1C1
-        start_chan: 1536
-        nchan: 512
-        nic: eth0
-        freq_range_mhz: [408.75, 420.0]
+  - name: snap03
+    host: snap03                 # Hostname or management IP of the RPi/KATCP
+    source_ip: 10.10.0.3         # 10‑GbE source IP on this SNAP
+    source_mac: 00:25:90:c2:b1:a2
+    feng_id: 2
+  - name: snap04
+    host: snap04
+    source_ip: 10.10.0.4
+    source_mac: 00:25:90:c2:b1:a3
+    feng_id: 3
+  - name: snap05
+    host: snap05                 # Hostname or management IP of the RPi/KATCP
+    source_ip: 10.10.0.5         # 10‑GbE source IP on this SNAP
+    source_mac: 00:25:90:c2:b1:a4
+    feng_id: 4
+  - name: snap06
+    host: snap06
+    source_ip: 10.10.0.6
+    source_mac: 00:25:90:c2:b1:a1
+    feng_id: 5
+  - name: snap07
+    host: snap07
+    source_ip: 10.10.0.7
+    source_mac: 00:25:90:c2:b1:a2
+    feng_id: 6
+  - name: snap08
+    host: snap08
+    source_ip: 10.10.0.8
+    source_mac: 00:25:90:c2:b1:a3
+    feng_id: 7
+  - name: snap09
+    host: snap09
+    source_ip: 10.10.0.9
+    source_mac: 00:25:90:c2:b1:a4
+    feng_id: 8
+  - name: snap10
+    host: snap10
+    source_ip: 10.10.0.10
+    source_mac: 00:25:90:c2:b1:a5
+    feng_id: 9  
+  - name: snap11
+    host: snap11
+    source_ip: 10.10.0.11
+    source_mac: 00:25:90:c2:b1:a6
+    feng_id: 10
+  - name: snap12
+    host: snap12
+    source_ip: 10.10.0.12
+    source_mac: 00:25:90:c2:b1:a7
+    feng_id: 11
+  - name: snap13
+    host: snap13
+    source_ip: 10.10.0.13
+    source_mac: 00:25:90:c2:b1:a8
+    feng_id: 12
+  - name: snap14
+    host: snap14
+    source_ip: 10.10.0.14
+    source_mac: 00:25:90:c2:b1:a9
+    feng_id: 13
+  - name: snap15
+    host: snap15
+    source_ip: 10.10.0.15
+    source_mac: 00:25:90:c2:b1:aa
+    feng_id: 14
+  - name: snap16
+    host: snap16
+    source_ip: 10.10.0.16
+    source_mac: 00:25:90:c2:b1:ab
+    feng_id: 15
+  - name: snap17
+    host: snap17
+    source_ip: 10.10.0.17
+    source_mac: 00:25:90:c2:b1:ac
+    feng_id: 16
+  - name: snap18
+    host: snap18
+    source_ip: 10.10.0.18
+    source_mac: 00:25:90:c2:b1:ad
+    feng_id: 17
+  - name: snap19
+    host: snap19
+    source_ip: 10.10.0.19
+    source_mac: 00:25:90:c2:b1:ae
+    feng_id: 18
+  - name: snap20
+    host: snap20
+    source_ip: 10.10.0.20
+    source_mac: 00:25:90:c2:b1:af
+    feng_id: 19
+  - name: snap21
+    host: snap21
+    source_ip: 10.10.0.21
+    source_mac: 00:25:90:c2:b1:b0
+    feng_id: 20
+  - name: snap22
+    host: snap22
+    source_ip: 10.10.0.22
+    source_mac: 00:25:90:c2:b1:b1
+    feng_id: 21
+  - name: snap23
+    host: snap23
+    source_ip: 10.10.0.23
+    source_mac: 00:25:90:c2:b1:b2
+    feng_id: 22
+  - name: snap24
+    host: snap24
+    source_ip: 10.10.0.24
+    source_mac: 00:25:90:c2:b1:b3
+    feng_id: 23
+  - name: snap25
+    host: snap25
+    source_ip: 10.10.0.25
+    source_mac: 00:25:90:c2:b1:b4
+    feng_id: 24
+  - name: snap26
+    host: snap26
+    source_ip: 10.10.0.26
+    source_mac: 00:25:90:c2:b1:b5
+    feng_id: 25
+  - name: snap27
+    host: snap27
+    source_ip: 10.10.0.27
+    source_mac: 00:25:90:c2:b1:b6
+    feng_id: 26
+  - name: snap28
+    host: snap28
+    source_ip: 10.10.0.28
+    source_mac: 00:25:90:c2:b1:b7
+    feng_id: 27
+  - name: snap29
+    host: snap29
+    source_ip: 10.10.0.29
+    source_mac: 00:25:90:c2:b1:b8
+    feng_id: 28
+  - name: snap30
+    host: snap30
+    source_ip: 10.10.0.30
+    source_mac: 00:25:90:c2:b1:b9
+    feng_id: 29
+  - name: snap31
+    host: snap31
+    source_ip: 10.10.0.31
+    source_mac: 00:25:90:c2:b1:ba
+    feng_id: 30
+  - name: snap32
+    host: snap32
+    source_ip: 10.10.0.32
+    source_mac: 00:25:90:c2:b1:bb
+    feng_id: 31
+  - name: snap33
+    host: snap33
+    source_ip: 10.10.0.33
+    source_mac: 00:25:90:c2:b1:bc
+    feng_id: 32
+  - name: snap34
+    host: snap34
+    source_ip: 10.10.0.34
+    source_mac: 00:25:90:c2:b1:bd
+    feng_id: 33
+  - name: snap35
+    host: snap35
+    source_ip: 10.10.0.35
+    source_mac: 00:25:90:c2:b1:be
+    feng_id: 34
+  - name: snap36
+    host: snap36
+    source_ip: 10.10.0.36
+    source_mac: 00:25:90:c2:b1:bf
+    feng_id: 35
+  - name: snap37
+    host: snap37
+    source_ip: 10.10.0.37
+    source_mac: 00:25:90:c2:b1:c0
+    feng_id: 36
+  - name: snap38
+    host: snap38
+    source_ip: 10.10.0.38
+    source_mac: 00:25:90:c2:b1:c1
+    feng_id: 37
+  - name: snap39
+    host: snap39
+    source_ip: 10.10.0.39
+    source_mac: 00:25:90:c2:b1:c2
+    feng_id: 38
+  - name: snap40
+    host: snap40
+    source_ip: 10.10.0.40
+    source_mac: 00:25:90:c2:b1:c3
+    feng_id: 39
+  - name: snap41
+    host: snap41
+    source_ip: 10.10.0.41
+    source_mac: 00:25:90:c2:b1:c4
+    feng_id: 40
+  - name: snap42
+    host: snap42
+    source_ip: 10.10.0.42
+    source_mac: 00:25:90:c2:b1:c5
+    feng_id: 41
+  - name: snap43
+    host: snap43
+    source_ip: 10.10.0.43
+    source_mac: 00:25:90:c2:b1:c6
+    feng_id: 42  
+
