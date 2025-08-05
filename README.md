@@ -1,10 +1,7 @@
 # snap_control
 
-Utility scripts and configs for configuring multiple CASM SNAP boards.
-
-## Files
-- **multi_snap_config.py** – main driver script.
-- **casm_feng_layout.yaml** – example board/NIC layout.
+Utility configs for configuring multiple CASM SNAP boards and starting the 
+stream to destinations defined in configs/casm_feng_layout.yaml
 
 ## Quick‑start
 ```bash
