@@ -30,7 +30,7 @@ Requirements
 ~~~~~~~~~~~~
 * Python ≥ 3.8
 * ``casm_f`` installed (see CASM SNAP F‑Engine docs).
-* Network reachability to all Raspberry‑Pis.
+* Network reachability to all SNAPs.
 
 """
 from __future__ import annotations
@@ -126,7 +126,7 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int])
         macs[ip] = _mac_to_int(dest["mac"])
 
     LOGGER.info("Connecting to %s …", host)
-    #feng = snap_fengine.SnapFengine(host)
+    snap = snap_fengine.SnapFengine(host, use_microblaze=True)
 
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
@@ -137,30 +137,27 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int])
         len(dests),
     )
 
-    print(f"macs: {macs}")
-    print(f"dests: {dests}")
+    snap.configure(
+        source_ip=source_ip,
+        source_port=source_port,
+        program=True,
+        fpgfile=fpgfile,
+        dests=dests,
+        macs=macs,
+        nchan_packet=nchan_packet,
+        sw_sync=True,
+        enable_tx=True,
+        feng_id=feng_id,
+    )
 
-    # feng.configure(
-    #     source_ip=source_ip,
-    #     source_port=source_port,
-    #     program=True,
-    #     fpgfile=fpgfile,
-    #     dests=dests,
-    #     macs=macs,
-    #     nchan_packet=nchan_packet,
-    #     sw_sync=True,
-    #     enable_tx=True,
-    #     feng_id=feng_id,
-    # )
-
-    # eth_status, flags = feng.eth.get_status()  # type: ignore[attr‑defined]
-    # LOGGER.info(
-    #     "%s: tx %.2f Gb/s – packets %d pps – flags %s",
-    #     host,
-    #     eth_status["gbps"],
-    #     eth_status["tx_ctr"],
-    #     flags,
-    # )
+    eth_status, flags = snap.eth.get_status()  # type: ignore[attr‑defined]
+    LOGGER.info(
+        "%s: tx %.2f Gb/s – packets %d pps – flags %s",
+        host,
+        eth_status["gbps"],
+        eth_status["tx_ctr"],
+        flags,
+    )
 
 # -----------------------------------------------------------------------------
 # CLI
@@ -198,5 +195,5 @@ def main() -> None:  # pragma: no cover
     LOGGER.info("All requested boards processed.")
 
 
-if __name__ == "__main__":  # pragma: no cover
-    main()
+# if __name__ == "__main__":  # pragma: no cover
+#     main()
