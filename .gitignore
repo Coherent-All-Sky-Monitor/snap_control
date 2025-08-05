@@ -1,0 +1,10 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.venv/
+
+# OS-specific junk
+.DS_Store
