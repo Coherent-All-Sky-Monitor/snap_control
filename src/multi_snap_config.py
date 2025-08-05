@@ -53,41 +53,29 @@ except ImportError as exc:  # pragma: no cover
         "(see https://github.com/casm-project/casm_f)."
     )
 
-from __future__ import annotations
-
-import argparse
-import logging
-import sys
-from pathlib import Path
-from typing import Dict, List, Tuple
-
-import yaml  # PyYAML
-
-try:
-    from casm_f import snap_fengine  # type: ignore
-except ImportError as exc:  # pragma: no cover
-    sys.exit(
-        "casm_f not importable – install it first (pip install casm_f)."
-    )
-
 LOGGER = logging.getLogger("multi_snap_config")
 
 # -----------------------------------------------------------------------------
 # YAML helpers
 # -----------------------------------------------------------------------------
 
-def _mac_to_int(mac_str: str | int) -> int:
-    """Convert a MAC address string/*int* into an integer."""
-    if isinstance(mac_str, int):
-        return mac_str
-    mac_str = mac_str.strip()
-    if mac_str.startswith("0x"):
-        return int(mac_str, 16)
-    return int(mac_str.replace(":", ""), 16)
+def _mac_to_int(mac: Union[str, int]) -> int:
+    """Convert a MAC address given as *str* (colon or hex) or *int* -> int."""
+    if isinstance(mac, int):
+        return mac
+    mac = mac.strip()
+    if mac.startswith("0x"):
+        return int(mac, 16)
+    return int(mac.replace(":", ""), 16)
 
 
-def _load_layout(path: Path) -> Tuple[dict, List[dict]]:
-    """Return *(common_cfg, boards_list)* from YAML file."""
+def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
+    """Load YAML from *path_like* (``str`` or ``Path``).
+
+    Returns ``(common_cfg, boards_list)`` after basic validation so callers can
+    use either ``_load_layout('file.yaml')`` or ``_load_layout(Path('file.yaml'))``.
+    """
+    path = Path(path_like)
     with path.open("r", encoding="utf-8") as fh:
         cfg = yaml.safe_load(fh)
     if not isinstance(cfg, dict):
@@ -95,32 +83,30 @@ def _load_layout(path: Path) -> Tuple[dict, List[dict]]:
 
     common = cfg.get("common")
     boards = cfg.get("boards")
-
     if common is None or boards is None:
         raise ValueError("YAML requires both 'common' and 'boards' blocks")
     if not isinstance(boards, list):
         raise ValueError("'boards' must be a list")
-
     return common, boards
 
 # -----------------------------------------------------------------------------
 # Configuration logic
 # -----------------------------------------------------------------------------
 
-def _configure_board(board: dict, common: dict, nchan_packet_cli: int | None) -> None:
-    """Configure a single SNAP using *board* overrides and *common* defaults."""
+def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int]) -> None:
+    """Configure one SNAP board using *common* defaults + *board* overrides."""
 
     host = board["host"]
     feng_id = int(board.get("feng_id", 0))
 
-    # Resolve common parameters ------------------------------------------------
+    # ---------- Common parameters ----------
     fpgfile = common["fpgfile"]
     source_port = int(common.get("source_port", 10000))
     dest_port = int(common.get("dest_port", 13000))
     nchan_packet = int(common.get("nchan_packet", nchan_packet_cli or 512))
     nchan_default = int(common.get("nchan", nchan_packet))
 
-    # Resolve per‑board parameters --------------------------------------------
+    # ---------- Per‑board overrides ----------
     source_ip = board["source_ip"]
     source_mac = board["source_mac"]
 
@@ -140,10 +126,10 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: int | None) ->
         macs[ip] = _mac_to_int(dest["mac"])
 
     LOGGER.info("Connecting to %s …", host)
-    feng = snap_fengine.SnapFengine(host)
+    #feng = snap_fengine.SnapFengine(host)
 
     LOGGER.info(
-        "Configuring %s (feng_id=%d) – source %s:%d → %d destinations",
+        "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
         host,
         feng_id,
         source_ip,
@@ -151,34 +137,39 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: int | None) ->
         len(dests),
     )
 
-    feng.configure(
-        source_ip=source_ip,
-        source_port=source_port,
-        program=True,
-        fpgfile=fpgfile,
-        dests=dests,
-        macs=macs,
-        nchan_packet=nchan_packet,
-        sw_sync=True,
-        enable_tx=True,
-        feng_id=feng_id,
-    )
+    print(f"macs: {macs}")
+    print(f"dests: {dests}")
 
-    eth_status, flags = feng.eth.get_status()  # type: ignore[attr‑defined]
-    LOGGER.info(
-        "%s: tx %.2f Gb/s – packets %d pps – flags %s",
-        host,
-        eth_status["gbps"],
-        eth_status["tx_ctr"],
-        flags,
-    )
+    # feng.configure(
+    #     source_ip=source_ip,
+    #     source_port=source_port,
+    #     program=True,
+    #     fpgfile=fpgfile,
+    #     dests=dests,
+    #     macs=macs,
+    #     nchan_packet=nchan_packet,
+    #     sw_sync=True,
+    #     enable_tx=True,
+    #     feng_id=feng_id,
+    # )
+
+    # eth_status, flags = feng.eth.get_status()  # type: ignore[attr‑defined]
+    # LOGGER.info(
+    #     "%s: tx %.2f Gb/s – packets %d pps – flags %s",
+    #     host,
+    #     eth_status["gbps"],
+    #     eth_status["tx_ctr"],
+    #     flags,
+    # )
 
 # -----------------------------------------------------------------------------
 # CLI
 # -----------------------------------------------------------------------------
 
 def _parse_args() -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description="Configure multiple CASM SNAP boards from YAML (common/board schema)")
+    ap = argparse.ArgumentParser(
+        description="Configure multiple CASM SNAP boards from YAML (common + boards schema)"
+    )
     ap.add_argument("layout_yaml", type=Path, help="YAML layout file")
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
@@ -187,7 +178,9 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> None:  # pragma: no cover
     args = _parse_args()
-    logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=args.log_level)
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=args.log_level
+    )
 
     try:
         common, boards = _load_layout(args.layout_yaml)

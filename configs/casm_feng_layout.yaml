@@ -31,19 +31,19 @@ common:
       start_chan: 1024
       freq_range_mhz: [406.25, 421.875]
     - ip: 192.168.100.6
-      mac: xx:xx:xx:xx:xx:xx
+      mac: c4:70:bd:4f:99:11
       server: casm-server-02
       nic_name: ens1006f0np0
       start_chan: 1536
       freq_range_mhz: [421.875, 437.5]
     - ip: 192.168.100.7
-      mac: xx:xx:xx:xx:xx:xx
+      mac: c4:70:bd:4f:99:11
       server: casm-server-02
       nic_name: ens1006f1np1
       start_chan: 2048
       freq_range_mhz: [437.5, 453.125]
     - ip: 192.168.100.8
-      mac: xx:xx:xx:xx:xx:xx
+      mac: c4:70:bd:4f:99:11
       server: casm-server-02
       nic_name: ens4013f1np1
       start_chan: 2560
