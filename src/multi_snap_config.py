@@ -195,21 +195,18 @@ def main() -> None:  # pragma: no cover
     except Exception as exc:
         LOGGER.error("Failed to parse YAML layout: %s", exc)
         sys.exit(1)
-
-    for board in boards:
-        # If IP addresses are provided, configure the board with the given IP address
-        if args.ip is not None:
-            # Handle multiple IP addresses
-            for ip in args.ip:
-                try:
-                    print(ip)#_configure_board(board, common, args.nchan_packet, ip)
-                except Exception:
-                    LOGGER.exception("Configuration failed for board %s with IP %s", board.get("host"), ip)
-                    continue
-            continue
-
-        # If no IP addresses are provided, configure all boards from the yaml file
-        elif args.ip is None:
+    
+    # If IP addresses are provided, configure the board with the given IP address
+    if args.ip is not None:
+        for ip in args.ip:
+            try:
+                print(ip)#_configure_board(board, common, args.nchan_packet, ip)
+            except Exception:
+                LOGGER.exception("Configuration failed for board %s with IP %s", board.get("host"), ip)
+                continue
+    # If no IP addresses are provided, configure all boards from the yaml file
+    elif args.ip is None:
+        for board in boards:
             try:
                 _configure_board(board, common, args.nchan_packet)
             except Exception:
