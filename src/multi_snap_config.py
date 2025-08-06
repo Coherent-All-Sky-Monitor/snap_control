@@ -53,6 +53,8 @@ except ImportError as exc:  # pragma: no cover
         "(see https://github.com/casm-project/casm_f)."
     )
 
+from casperfpga import CasperFpga, TapcpTransport, KatcpTransport
+
 LOGGER = logging.getLogger("multi_snap_config")
 
 # -----------------------------------------------------------------------------
@@ -134,9 +136,12 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int],
 
     try:
         snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
-    except RuntimeError:
-        print("time delay thing")
-        exit()
+    except:
+        print("Using CasperFpga at first, to fix max_time_delay error")
+        snap = CasperFpga(source_ip, transport=TapcpTransport)
+        snap.upload_to_ram_and_program(fpgfile)
+        snap.close()
+        snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
         
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
@@ -147,11 +152,12 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int],
         len(dests),
     )
 
+    snap.program(fpgfile, initialize_adc=True)
+
     snap.configure(
         source_ip=source_ip,
         source_port=source_port,
-        program=True,
-        fpgfile=fpgfile,
+        program=False,
         dests=dests,
         macs=macs,
         nchan_packet=nchan_packet,
@@ -200,7 +206,7 @@ def main() -> None:  # pragma: no cover
     if args.ip is not None:
         for ip in args.ip:
             try:
-                print(ip)#_configure_board(board, common, args.nchan_packet, ip)
+                _configure_board(board, common, args.nchan_packet, ip)
             except Exception:
                 LOGGER.exception("Configuration failed for board %s with IP %s", board.get("host"), ip)
                 continue
