@@ -93,7 +93,7 @@ def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
 # Configuration logic
 # -----------------------------------------------------------------------------
 
-def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int]) -> None:
+def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int], snap_ip: Optional[str]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
 
     host = board["host"]
@@ -106,8 +106,13 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int])
     nchan_packet = int(common.get("nchan_packet", nchan_packet_cli or 512))
     nchan_default = int(common.get("nchan", nchan_packet))
 
-    # ---------- Per‑board overrides ----------
-    source_ip = board["source_ip"]
+    
+    if snap_ip:
+        source_ip = snap_ip
+    else:
+        # ---------- Per‑board overrides ----------
+        source_ip = board["source_ip"]
+
     source_mac = board["source_mac"]
 
     macs: Dict[str, int] = {source_ip: _mac_to_int(source_mac)}
@@ -125,9 +130,14 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int])
         )
         macs[ip] = _mac_to_int(dest["mac"])
 
-    LOGGER.info("Connecting to %s …", host)
-    snap = snap_fengine.SnapFengine(host, use_microblaze=True)
+    LOGGER.info("Connecting to %s at IP=%s …" % (host,source_ip))
 
+    try:
+        snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
+    except RuntimeError:
+        print("time delay thing")
+        exit()
+        
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
         host,
@@ -145,7 +155,7 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int])
         dests=dests,
         macs=macs,
         nchan_packet=nchan_packet,
-        sw_sync=True,
+        sw_sync=False,
         enable_tx=True,
         feng_id=feng_id,
     )
@@ -168,6 +178,7 @@ def _parse_args() -> argparse.Namespace:
         description="Configure multiple CASM SNAP boards from YAML (common + boards schema)"
     )
     ap.add_argument("layout_yaml", type=Path, help="YAML layout file")
+    ap.add_argument("ip", type=str, help="", default=None)
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     return ap.parse_args()
@@ -186,14 +197,19 @@ def main() -> None:  # pragma: no cover
         sys.exit(1)
 
     for board in boards:
+        if args.ip is not None:
+            _configure_board(board, common, args.nchan_packet, args.ip)
+            continue
+        
         try:
             _configure_board(board, common, args.nchan_packet)
         except Exception:
             LOGGER.exception("Configuration failed for board %s", board.get("host"))
             continue
+        break
 
     LOGGER.info("All requested boards processed.")
 
 
-# if __name__ == "__main__":  # pragma: no cover
-#     main()
+if __name__ == "__main__":  # pragma: no cover
+     main()

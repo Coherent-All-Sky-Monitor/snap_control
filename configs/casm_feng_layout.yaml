@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 
 common:
-  fpgfile: /home/user/software/casm_snap_f/firmware/snap_f_12i_4kc/outputs/snap_f_12i_4kc_2025-05-08_1446.fpg'    # Bitstream programmed to every board
+  fpgfile: /home/user/connor/code/casm_snap_f/firmware/snap_f_12i_4kc/outputs/snap_f_12i_4kc_2025-05-08_1446.fpg    # Bitstream programmed to every board
   source_port: 10000                         # UDP source port on all SNAPs
   dest_port: 13000                           # UDP destination port on all targets
   nic: eth0                                  # Down‑stream 10‑GbE NIC name (identical for all boards)
@@ -30,24 +30,24 @@ common:
       nic_name: ens4013f1np1
       start_chan: 1024
       freq_range_mhz: [406.25, 421.875]
-    - ip: 192.168.100.6
-      mac: c4:70:bd:4f:99:11
-      server: casm-server-02
-      nic_name: ens1006f0np0
-      start_chan: 1536
-      freq_range_mhz: [421.875, 437.5]
-    - ip: 192.168.100.7
-      mac: c4:70:bd:4f:99:11
-      server: casm-server-02
-      nic_name: ens1006f1np1
-      start_chan: 2048
-      freq_range_mhz: [437.5, 453.125]
-    - ip: 192.168.100.8
-      mac: c4:70:bd:4f:99:11
-      server: casm-server-02
-      nic_name: ens4013f1np1
-      start_chan: 2560
-      freq_range_mhz: [453.125, 468.75]
+#    - ip: 192.168.100.6
+#      mac: c4:70:bd:4f:99:11
+#      server: casm-server-02
+#      nic_name: ens1006f0np0
+#      start_chan: 1536
+#      freq_range_mhz: [421.875, 437.5]
+#    - ip: 192.168.100.7
+#      mac: c4:70:bd:4f:99:11
+#      server: casm-server-02
+#      nic_name: ens1006f1np1
+#      start_chan: 2048
+#      freq_range_mhz: [437.5, 453.125]
+#    - ip: 192.168.100.8
+#      mac: c4:70:bd:4f:99:11
+#      server: casm-server-02
+#      nic_name: ens4013f1np1
+#      start_chan: 2560
+#      freq_range_mhz: [453.125, 468.75]
 
 # ------------------------
 # Per‑board configuration 
@@ -55,7 +55,7 @@ common:
 boards:
   - name: snap01
     host: snap01                 # Hostname or management IP of the RPi/KATCP
-    source_ip: 10.10.0.1         # 10‑GbE source IP on this SNAP
+    source_ip: 192.168.0.56         # 10‑GbE source IP on this SNAP
     source_mac: 00:25:90:c2:b1:a0
     feng_id: 0
   - name: snap02
