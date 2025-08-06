@@ -206,7 +206,7 @@ def main() -> None:  # pragma: no cover
     if args.ip is not None:
         for ip in args.ip:
             try:
-                _configure_board(board, common, args.nchan_packet, ip)
+                _configure_board(boards[0], common, args.nchan_packet, ip)
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
