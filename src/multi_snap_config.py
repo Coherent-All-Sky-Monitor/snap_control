@@ -202,12 +202,12 @@ def main() -> None:  # pragma: no cover
             # Handle multiple IP addresses
             for ip in args.ip:
                 try:
-                    _configure_board(board, common, args.nchan_packet, ip)
+                    print(ip)#_configure_board(board, common, args.nchan_packet, ip)
                 except Exception:
                     LOGGER.exception("Configuration failed for board %s with IP %s", board.get("host"), ip)
                     continue
             continue
-        
+
         # If no IP addresses are provided, configure all boards from the yaml file
         elif args.ip is None:
             try:
