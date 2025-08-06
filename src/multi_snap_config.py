@@ -178,7 +178,7 @@ def _parse_args() -> argparse.Namespace:
         description="Configure multiple CASM SNAP boards from YAML (common + boards schema)"
     )
     ap.add_argument("layout_yaml", type=Path, help="YAML layout file")
-    ap.add_argument("ip", type=str, help="", default=None)
+    ap.add_argument("--ip", type=str, nargs='+', help="IP address(es) of the SNAP to configure (single or multiple)", default=None)
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     return ap.parse_args()
@@ -197,16 +197,28 @@ def main() -> None:  # pragma: no cover
         sys.exit(1)
 
     for board in boards:
+        # If IP addresses are provided, configure the board with the given IP address
         if args.ip is not None:
-            _configure_board(board, common, args.nchan_packet, args.ip)
+            # Handle multiple IP addresses
+            for ip in args.ip:
+                try:
+                    _configure_board(board, common, args.nchan_packet, ip)
+                except Exception:
+                    LOGGER.exception("Configuration failed for board %s with IP %s", board.get("host"), ip)
+                    continue
             continue
         
-        try:
-            _configure_board(board, common, args.nchan_packet)
-        except Exception:
-            LOGGER.exception("Configuration failed for board %s", board.get("host"))
-            continue
-        break
+        # If no IP addresses are provided, configure all boards from the yaml file
+        elif args.ip is None:
+            try:
+                _configure_board(board, common, args.nchan_packet)
+            except Exception:
+                LOGGER.exception("Configuration failed for board %s", board.get("host"))
+                continue
+            else:
+                print("Invalid argument")
+                exit()
+            break
 
     LOGGER.info("All requested boards processed.")
 
