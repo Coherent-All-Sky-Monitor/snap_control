@@ -9,7 +9,7 @@ stream to destinations defined in configs/casm_feng_layout.yaml
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Coherent-All-Sky-Monitor/snap_control.git
 cd snap_control
 
 # Install dependencies using Poetry
