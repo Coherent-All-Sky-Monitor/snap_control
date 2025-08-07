@@ -98,7 +98,8 @@ def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
 
 def _configure_board(board: dict, common: dict, 
                      nchan_packet_cli: Optional[int], 
-                     snap_ip: Optional[str], programmed: Optional[bool]) -> None:
+                     snap_ip: Optional[str], 
+                     programmed: Optional[bool]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
 
     host = board["host"]
@@ -160,17 +161,14 @@ def _configure_board(board: dict, common: dict,
         len(dests),
     )
 
-    for adc_attempts in range(5):
-        try:
-            snap.program(fpgfile, initialize_adc=True)
-            print("Finished on attempt %d" % adc_attempts)
-            break
-        except:
-            print("ADC link training failed. Attempt %d..." % adc_attempts)
-            continue
-
-#    snap.configure(source_ip=source_ip, source_port=20000, program=False,
-#                   dests=dests, macs=macs, nchan_packet=512, enable_tx=True, feng_id=2)
+    try:
+        snap.program(fpgfile, initialize_adc=True)
+        print("Finished on attempt %d" % adc_attempts)
+        break
+    except:
+        print("ADC link training failed. Attempt %d..." % adc_attempts)
+        for adc_attempts in range(5):
+            snap.adc.initialize()
 
     snap.configure(
         source_ip=source_ip,
@@ -204,6 +202,7 @@ def _parse_args() -> argparse.Namespace:
                     default=None)
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
+    ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
     return ap.parse_args()
 
 
@@ -223,7 +222,8 @@ def main() -> None:  # pragma: no cover
     if args.ip is not None:
         for ip in args.ip:
             try:
-                _configure_board(boards[0], common, args.nchan_packet, ip, programmed=False)
+                _configure_board(boards[0], common, args.nchan_packet, 
+                                 ip, programmed=args.programmed)
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
