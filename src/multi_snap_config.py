@@ -165,7 +165,7 @@ def _configure_board(board: dict, common: dict,
         snap.program(fpgfile, initialize_adc=True)
         print("Finished on attempt %d" % adc_attempts)
     except:
-        print("ADC link training failed. Attempt %d..." % adc_attempts)
+        print("Initial program failed. Attempting to initialize ADC.")
         snap.adc.initialize()
         snap.program(fpgfile, initialize_adc=True)
 
