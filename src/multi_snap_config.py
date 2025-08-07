@@ -102,7 +102,8 @@ def _configure_board(board: dict, common: dict,
                      programmed: Optional[bool],
                      feng_id: Optional[int]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
-
+    host = board["host"]
+    
     # ---------- Common parameters ----------
     fpgfile = common["fpgfile"]
     source_port = int(common.get("source_port", 10000))
@@ -119,7 +120,6 @@ def _configure_board(board: dict, common: dict,
         source_mac = int(mac.replace(":",""),16)
         feng_id = feng_id
     else:
-        host = board["host"]
         feng_id = int(board.get("feng_id", 0))
         # ---------- Per‑board overrides ----------
         source_ip = board["source_ip"]
