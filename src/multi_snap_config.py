@@ -166,8 +166,8 @@ def _configure_board(board: dict, common: dict,
         print("Finished on attempt %d" % adc_attempts)
     except:
         print("ADC link training failed. Attempt %d..." % adc_attempts)
-        for adc_attempts in range(5):
-            snap.adc.initialize()
+        snap.adc.initialize()
+        snap.program(fpgfile, initialize_adc=True)
 
     snap.configure(
         source_ip=source_ip,
