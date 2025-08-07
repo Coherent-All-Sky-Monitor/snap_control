@@ -95,7 +95,9 @@ def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
 # Configuration logic
 # -----------------------------------------------------------------------------
 
-def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int], snap_ip: Optional[str]) -> None:
+def _configure_board(board: dict, common: dict, 
+                     nchan_packet_cli: Optional[int], 
+                     snap_ip: Optional[str]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
 
     host = board["host"]
@@ -134,14 +136,11 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int],
 
     LOGGER.info("Connecting to %s at IP=%s …" % (host,source_ip))
 
-    try:
-        snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
-    except:
-        print("Using CasperFpga at first, to fix max_time_delay error")
-        snap = CasperFpga(source_ip, transport=TapcpTransport)
-        snap.upload_to_ram_and_program(fpgfile)
-        snap.close()
-        snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
+    print("Using CasperFpga at first, to fix max_time_delay error")
+    snap = CasperFpga(source_ip, transport=TapcpTransport)
+    snap.upload_to_ram_and_program(fpgfile)
+    snap.close()
+    snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
         
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
@@ -152,7 +151,13 @@ def _configure_board(board: dict, common: dict, nchan_packet_cli: Optional[int],
         len(dests),
     )
 
-    snap.program(fpgfile, initialize_adc=True)
+    for adc_attempts in range(5):
+        try:
+            snap.program(fpgfile, initialize_adc=True)
+            break
+        except:
+            print("ADC link training failed. Attempt %d..." % adc_attempts)
+            continue
 
     snap.configure(
         source_ip=source_ip,
@@ -184,7 +189,8 @@ def _parse_args() -> argparse.Namespace:
         description="Configure multiple CASM SNAP boards from YAML (common + boards schema)"
     )
     ap.add_argument("layout_yaml", type=Path, help="YAML layout file")
-    ap.add_argument("--ip", type=str, nargs='+', help="IP address(es) of the SNAP to configure (single or multiple)", default=None)
+    ap.add_argument("--ip", type=str, nargs='+', help="IP address(es) of the SNAP to configure (single or multiple)", 
+                    default=None)
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     return ap.parse_args()
