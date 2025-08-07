@@ -103,7 +103,7 @@ def _configure_board(board: dict, common: dict,
                      feng_id: Optional[int]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
     host = board["host"]
-    
+
     # ---------- Common parameters ----------
     fpgfile = common["fpgfile"]
     source_port = int(common.get("source_port", 10000))
@@ -147,11 +147,6 @@ def _configure_board(board: dict, common: dict,
         snap.upload_to_ram_and_program(fpgfile)
     
     snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
-
-    print(source_ip)
-    print(source_port)
-    print(dests)
-    print(macs)
     
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
