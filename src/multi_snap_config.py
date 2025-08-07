@@ -151,7 +151,7 @@ def _configure_board(board: dict, common: dict,
 
     if test_mode is not None:
         if test_mode == "zeros":
-            snap.input.use_zeros()
+            snap.input.use_zero()
             LOGGER.info("Using zeros as input")
         elif test_mode == "noise":
             snap.input.use_noise()
@@ -159,7 +159,7 @@ def _configure_board(board: dict, common: dict,
         elif test_mode == "counter":
             snap.input.use_counter()
             LOGGER.info("Using random as input")
-            
+
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
         host,
