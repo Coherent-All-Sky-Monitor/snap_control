@@ -135,11 +135,11 @@ def _configure_board(board: dict, common: dict,
         macs[ip] = _mac_to_int(dest["mac"])
 
     LOGGER.info("Connecting to %s at IP=%s …" % (host,source_ip))
-
-    print("Using CasperFpga at first, to fix max_time_delay error")
     snap = CasperFpga(source_ip, transport=TapcpTransport)
+    LOGGER.info("Using CasperFpga at first, to fix max_time_delay error")
     snap.upload_to_ram_and_program(fpgfile)
     snap.close()
+    
     snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
         
     LOGGER.info(
