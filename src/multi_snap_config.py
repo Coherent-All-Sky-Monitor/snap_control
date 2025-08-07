@@ -146,7 +146,9 @@ def _configure_board(board: dict, common: dict,
         snap = CasperFpga(source_ip, transport=TapcpTransport)
         LOGGER.info("Using CasperFpga at first, to fix max_time_delay error")
         snap.upload_to_ram_and_program(fpgfile)
-    
+
+    snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
+
     if test_mode is not None:
         if test_mode == "zeros":
             snap.input.use_zeros()
@@ -157,9 +159,7 @@ def _configure_board(board: dict, common: dict,
         elif test_mode == "counter":
             snap.input.use_counter()
             LOGGER.info("Using random as input")
-
-    snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
-    
+            
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
         host,
@@ -212,7 +212,6 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
     ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", choices=["zeros", "noise", "counter"])
     return ap.parse_args()
-
 
 def main() -> None:  # pragma: no cover
     args = _parse_args()
