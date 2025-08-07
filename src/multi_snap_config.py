@@ -41,7 +41,8 @@ import logging
 import sys
 from pathlib import Path
 from typing import Dict, List
-
+from subprocess import Popen, PIPE
+import re
 import yaml  # PyYAML
 
 # CASM library import — errors out cleanly if missing
@@ -97,7 +98,7 @@ def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
 
 def _configure_board(board: dict, common: dict, 
                      nchan_packet_cli: Optional[int], 
-                     snap_ip: Optional[str]) -> None:
+                     snap_ip: Optional[str], programmed: Optional[bool]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
 
     host = board["host"]
@@ -109,15 +110,18 @@ def _configure_board(board: dict, common: dict,
     dest_port = int(common.get("dest_port", 13000))
     nchan_packet = int(common.get("nchan_packet", nchan_packet_cli or 512))
     nchan_default = int(common.get("nchan", nchan_packet))
-
     
     if snap_ip:
         source_ip = snap_ip
+        # Obtaining SNAP board mac
+        pid = Popen(["arp","-n",source_ip],stdout=PIPE)
+        s = pid.communicate()[0]
+        mac = re.search(r"(([a-f\d]{1,2}\:){5}[a-f\d]{1,2})",str(s)).groups()[0]
+        source_mac = int(mac.replace(":",""),16)
     else:
         # ---------- Per‑board overrides ----------
         source_ip = board["source_ip"]
-
-    source_mac = board["source_mac"]
+        source_mac = board["source_mac"]
 
     macs: Dict[str, int] = {source_ip: _mac_to_int(source_mac)}
     dests: List[dict] = []
@@ -134,13 +138,19 @@ def _configure_board(board: dict, common: dict,
         )
         macs[ip] = _mac_to_int(dest["mac"])
 
-    LOGGER.info("Connecting to %s at IP=%s …" % (host,source_ip))
-    snap = CasperFpga(source_ip, transport=TapcpTransport)
-    LOGGER.info("Using CasperFpga at first, to fix max_time_delay error")
-    snap.upload_to_ram_and_program(fpgfile)
+    if programmed is False:
+        LOGGER.info("Connecting to %s at IP=%s …" % (host,source_ip))
+        snap = CasperFpga(source_ip, transport=TapcpTransport)
+        LOGGER.info("Using CasperFpga at first, to fix max_time_delay error")
+        snap.upload_to_ram_and_program(fpgfile)
     
     snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
-        
+
+    print(source_ip)
+    print(source_port)
+    print(dests)
+    print(macs)
+    
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
         host,
@@ -153,10 +163,14 @@ def _configure_board(board: dict, common: dict,
     for adc_attempts in range(5):
         try:
             snap.program(fpgfile, initialize_adc=True)
+            print("Finished on attempt %d" % adc_attempts)
             break
         except:
             print("ADC link training failed. Attempt %d..." % adc_attempts)
             continue
+
+#    snap.configure(source_ip=source_ip, source_port=20000, program=False,
+#                   dests=dests, macs=macs, nchan_packet=512, enable_tx=True, feng_id=2)
 
     snap.configure(
         source_ip=source_ip,
@@ -165,11 +179,9 @@ def _configure_board(board: dict, common: dict,
         dests=dests,
         macs=macs,
         nchan_packet=nchan_packet,
-        sw_sync=False,
         enable_tx=True,
         feng_id=feng_id,
     )
-
     eth_status, flags = snap.eth.get_status()  # type: ignore[attr‑defined]
     LOGGER.info(
         "%s: tx %.2f Gb/s – packets %d pps – flags %s",
@@ -211,7 +223,7 @@ def main() -> None:  # pragma: no cover
     if args.ip is not None:
         for ip in args.ip:
             try:
-                _configure_board(boards[0], common, args.nchan_packet, ip)
+                _configure_board(boards[0], common, args.nchan_packet, ip, programmed=False)
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
