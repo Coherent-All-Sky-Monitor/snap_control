@@ -99,11 +99,9 @@ def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
 def _configure_board(board: dict, common: dict, 
                      nchan_packet_cli: Optional[int], 
                      snap_ip: Optional[str], 
-                     programmed: Optional[bool]) -> None:
+                     programmed: Optional[bool],
+                     feng_id: Optional[int]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
-
-    host = board["host"]
-    feng_id = int(board.get("feng_id", 0))
 
     # ---------- Common parameters ----------
     fpgfile = common["fpgfile"]
@@ -119,7 +117,10 @@ def _configure_board(board: dict, common: dict,
         s = pid.communicate()[0]
         mac = re.search(r"(([a-f\d]{1,2}\:){5}[a-f\d]{1,2})",str(s)).groups()[0]
         source_mac = int(mac.replace(":",""),16)
+        feng_id = feng_id
     else:
+        host = board["host"]
+        feng_id = int(board.get("feng_id", 0))
         # ---------- Per‑board overrides ----------
         source_ip = board["source_ip"]
         source_mac = board["source_mac"]
@@ -168,6 +169,7 @@ def _configure_board(board: dict, common: dict,
         print("Initial program failed. Attempting to initialize ADC.")
         snap.adc.initialize()
         snap.program(fpgfile, initialize_adc=True)
+
 
     snap.configure(
         source_ip=source_ip,
@@ -219,10 +221,10 @@ def main() -> None:  # pragma: no cover
     
     # If IP addresses are provided, configure the board with the given IP address
     if args.ip is not None:
-        for ip in args.ip:
+        for kk, ip in enumerate(args.ip):
             try:
                 _configure_board(boards[0], common, args.nchan_packet, 
-                                 ip, programmed=args.programmed)
+                                 ip, programmed=args.programmed, feng_id=kk)
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
