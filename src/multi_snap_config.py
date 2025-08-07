@@ -149,17 +149,6 @@ def _configure_board(board: dict, common: dict,
 
     snap = snap_fengine.SnapFengine(source_ip, use_microblaze=True)
 
-    if test_mode is not None:
-        if test_mode == "zeros":
-            snap.input.use_zero()
-            LOGGER.info("Using zeros as input")
-        elif test_mode == "noise":
-            snap.input.use_noise()
-            LOGGER.info("Using ones as input")
-        elif test_mode == "counter":
-            snap.input.use_counter()
-            LOGGER.info("Using random as input")
-
     LOGGER.info(
         "Configuring %s (feng_id=%d) – src %s:%d → %d dests",
         host,
@@ -187,6 +176,18 @@ def _configure_board(board: dict, common: dict,
         enable_tx=True,
         feng_id=feng_id,
     )
+
+    if test_mode is not None:
+        if test_mode == "zeros":
+            snap.input.use_zero()
+            LOGGER.info("Using zeros as input")
+        elif test_mode == "noise":
+            snap.input.use_noise()
+            LOGGER.info("Using ones as input")
+        elif test_mode == "counter":
+            snap.input.use_counter()
+            LOGGER.info("Using random as input")
+            
     eth_status, flags = snap.eth.get_status()  # type: ignore[attr‑defined]
     LOGGER.info(
         "%s: tx %.2f Gb/s – packets %d pps – flags %s",
