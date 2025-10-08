@@ -108,7 +108,6 @@ def _configure_board(board: dict, common: dict,
     # ---------- Common parameters ----------
     fpgfile = common["fpgfile"]
     source_port = int(common.get("source_port", 10000))
-    dest_port = int(common.get("dest_port", 13000))
     nchan_packet = int(common.get("nchan_packet", nchan_packet_cli or 512))
     nchan_default = int(common.get("nchan", nchan_packet))
     
@@ -134,7 +133,7 @@ def _configure_board(board: dict, common: dict,
         dests.append(
             {
                 "ip": ip,
-                "port": dest_port,
+                "port": int(dest["dest_port"]),
                 "start_chan": int(dest["start_chan"]),
                 "nchan": int(dest.get("nchan", nchan_default)),
             }
