@@ -7,7 +7,7 @@
 common:
   fpgfile: /home/user/connor/code/casm_snap_f/firmware/snap_f_12i_4kc/outputs/snap_f_12i_4kc_2025-05-08_1446.fpg    # Bitstream programmed to every board
   source_port: 10000                         # UDP source port on all SNAPs
-  nic: eth0                                  # Down‑stream 10‑GbE NIC name (identical for all boards)
+  nic: eth0                                  # Down‑stream 100‑GbE NIC name (identical for all boards)
   nchan: 512                                 # Channels each board streams per destination
   nchan_packet: 512                          # Channels per UDP packet
   destinations:                              # Corner‑turn targets shared by all boards
@@ -57,219 +57,219 @@ common:
 # Per‑board configuration 
 # ------------------------
 boards:
-  - name: snap01
+  - name: snap141
     host: snap01                 # Hostname or management IP of the RPi/KATCP
-    source_ip: 192.168.0.56         # 10‑GbE source IP on this SNAP
-    source_mac: 00:25:90:c2:b1:a0
+    source_ip: 192.168.120.101         # 10‑GbE source IP on this SNAP
+    source_mac: 00:24:88:62:18:05
     feng_id: 0
-  - name: snap02
+  - name: snap142
     host: snap02
-    source_ip: 10.10.0.2
-    source_mac: 00:25:90:c2:b1:a1
+    source_ip: 192.168.120.102
+    source_mac: 00:40:33:A0:18:05
     feng_id: 1
-  - name: snap03
+  - name: snap143
     host: snap03                 # Hostname or management IP of the RPi/KATCP
-    source_ip: 10.10.0.3         # 10‑GbE source IP on this SNAP
-    source_mac: 00:25:90:c2:b1:a2
+    source_ip: 192.168.120.103         # 10‑GbE source IP on this SNAP
+    source_mac: 00:32:33:C6:18:05
     feng_id: 2
-  - name: snap04
+  - name: snap144
     host: snap04
-    source_ip: 10.10.0.4
-    source_mac: 00:25:90:c2:b1:a3
+    source_ip: 192.168.120.104
+    source_mac: 00:24:ff:fe:18:05
     feng_id: 3
-  - name: snap05
+  - name: snap145
     host: snap05                 # Hostname or management IP of the RPi/KATCP
-    source_ip: 10.10.0.5         # 10‑GbE source IP on this SNAP
-    source_mac: 00:25:90:c2:b1:a4
+    source_ip: 192.168.120.105         # 10‑GbE source IP on this SNAP
+    source_mac: 00:27:fa:e8:18:05
     feng_id: 4
-  - name: snap06
+  - name: snap146
     host: snap06
-    source_ip: 10.10.0.6
-    source_mac: 00:25:90:c2:b1:a1
+    source_ip: 192.168.120.106
+    source_mac: 00:25:be:bd:18:05
     feng_id: 5
-  - name: snap07
+  - name: snap147
     host: snap07
-    source_ip: 10.10.0.7
-    source_mac: 00:25:90:c2:b1:a2
+    source_ip: 192.168.120.107
+    source_mac: 00:33:0b:f9:18:05
     feng_id: 6
-  - name: snap08
+  - name: snap148
     host: snap08
-    source_ip: 10.10.0.8
+    source_ip: 192.168.120.108
     source_mac: 00:25:90:c2:b1:a3
     feng_id: 7
-  - name: snap09
+  - name: snap149
     host: snap09
-    source_ip: 10.10.0.9
+    source_ip: 192.168.120.109
     source_mac: 00:25:90:c2:b1:a4
     feng_id: 8
-  - name: snap10
+  - name: snap150
     host: snap10
-    source_ip: 10.10.0.10
+    source_ip: 192.168.120.110
     source_mac: 00:25:90:c2:b1:a5
     feng_id: 9  
-  - name: snap11
+  - name: snap151
     host: snap11
-    source_ip: 10.10.0.11
+    source_ip: 192.168.120.111
     source_mac: 00:25:90:c2:b1:a6
     feng_id: 10
-  - name: snap12
+  - name: snap152
     host: snap12
-    source_ip: 10.10.0.12
+    source_ip: 192.168.120.112
     source_mac: 00:25:90:c2:b1:a7
     feng_id: 11
-  - name: snap13
+  - name: snap153
     host: snap13
-    source_ip: 10.10.0.13
+    source_ip: 192.168.120.113
     source_mac: 00:25:90:c2:b1:a8
     feng_id: 12
-  - name: snap14
+  - name: snap154
     host: snap14
-    source_ip: 10.10.0.14
+    source_ip: 192.168.120.114
     source_mac: 00:25:90:c2:b1:a9
     feng_id: 13
-  - name: snap15
+  - name: snap155
     host: snap15
-    source_ip: 10.10.0.15
+    source_ip: 192.168.120.115
     source_mac: 00:25:90:c2:b1:aa
     feng_id: 14
-  - name: snap16
+  - name: snap156
     host: snap16
-    source_ip: 10.10.0.16
+    source_ip: 192.168.120.116
     source_mac: 00:25:90:c2:b1:ab
     feng_id: 15
-  - name: snap17
+  - name: snap157
     host: snap17
-    source_ip: 10.10.0.17
+    source_ip: 192.168.120.117
     source_mac: 00:25:90:c2:b1:ac
     feng_id: 16
-  - name: snap18
+  - name: snap158
     host: snap18
-    source_ip: 10.10.0.18
+    source_ip: 192.168.120.118
     source_mac: 00:25:90:c2:b1:ad
     feng_id: 17
-  - name: snap19
+  - name: snap159
     host: snap19
-    source_ip: 10.10.0.19
+    source_ip: 192.168.120.119
     source_mac: 00:25:90:c2:b1:ae
     feng_id: 18
-  - name: snap20
+  - name: snap160
     host: snap20
-    source_ip: 10.10.0.20
+    source_ip: 192.168.120.120
     source_mac: 00:25:90:c2:b1:af
     feng_id: 19
-  - name: snap21
+  - name: snap161
     host: snap21
-    source_ip: 10.10.0.21
+    source_ip: 192.168.120.121
     source_mac: 00:25:90:c2:b1:b0
     feng_id: 20
-  - name: snap22
+  - name: snap162
     host: snap22
-    source_ip: 10.10.0.22
+    source_ip: 192.168.120.122
     source_mac: 00:25:90:c2:b1:b1
     feng_id: 21
-  - name: snap23
+  - name: snap163
     host: snap23
-    source_ip: 10.10.0.23
+    source_ip: 192.168.120.123
     source_mac: 00:25:90:c2:b1:b2
     feng_id: 22
-  - name: snap24
+  - name: snap164
     host: snap24
-    source_ip: 10.10.0.24
+    source_ip: 192.168.120.124
     source_mac: 00:25:90:c2:b1:b3
     feng_id: 23
-  - name: snap25
+  - name: snap165
     host: snap25
-    source_ip: 10.10.0.25
+    source_ip: 192.168.120.125
     source_mac: 00:25:90:c2:b1:b4
     feng_id: 24
-  - name: snap26
+  - name: snap166
     host: snap26
-    source_ip: 10.10.0.26
+    source_ip: 192.168.120.126
     source_mac: 00:25:90:c2:b1:b5
     feng_id: 25
-  - name: snap27
+  - name: snap167
     host: snap27
-    source_ip: 10.10.0.27
+    source_ip: 192.168.120.127
     source_mac: 00:25:90:c2:b1:b6
     feng_id: 26
-  - name: snap28
+  - name: snap168
     host: snap28
-    source_ip: 10.10.0.28
+    source_ip: 192.168.120.128
     source_mac: 00:25:90:c2:b1:b7
     feng_id: 27
-  - name: snap29
+  - name: snap169
     host: snap29
-    source_ip: 10.10.0.29
+    source_ip: 192.168.120.129
     source_mac: 00:25:90:c2:b1:b8
     feng_id: 28
-  - name: snap30
+  - name: snap170
     host: snap30
-    source_ip: 10.10.0.30
+    source_ip: 192.168.120.130
     source_mac: 00:25:90:c2:b1:b9
     feng_id: 29
-  - name: snap31
+  - name: snap171
     host: snap31
-    source_ip: 10.10.0.31
+    source_ip: 192.168.120.131
     source_mac: 00:25:90:c2:b1:ba
     feng_id: 30
-  - name: snap32
+  - name: snap172
     host: snap32
-    source_ip: 10.10.0.32
+    source_ip: 192.168.120.132
     source_mac: 00:25:90:c2:b1:bb
     feng_id: 31
-  - name: snap33
+  - name: snap173
     host: snap33
-    source_ip: 10.10.0.33
+    source_ip: 192.168.120.133
     source_mac: 00:25:90:c2:b1:bc
     feng_id: 32
-  - name: snap34
+  - name: snap174
     host: snap34
-    source_ip: 10.10.0.34
+    source_ip: 192.168.120.134
     source_mac: 00:25:90:c2:b1:bd
     feng_id: 33
-  - name: snap35
+  - name: snap175
     host: snap35
-    source_ip: 10.10.0.35
+    source_ip: 192.168.120.135
     source_mac: 00:25:90:c2:b1:be
     feng_id: 34
-  - name: snap36
+  - name: snap176
     host: snap36
-    source_ip: 10.10.0.36
+    source_ip: 192.168.120.136
     source_mac: 00:25:90:c2:b1:bf
     feng_id: 35
-  - name: snap37
+  - name: snap177 # This is the final 2024 Digicom SNAP
     host: snap37
-    source_ip: 10.10.0.37
+    source_ip: 192.168.120.137
     source_mac: 00:25:90:c2:b1:c0
     feng_id: 36
   - name: snap38
     host: snap38
-    source_ip: 10.10.0.38
+    source_ip: 192.168.120.138
     source_mac: 00:25:90:c2:b1:c1
     feng_id: 37
   - name: snap39
     host: snap39
-    source_ip: 10.10.0.39
+    source_ip: 192.168.120.139
     source_mac: 00:25:90:c2:b1:c2
     feng_id: 38
   - name: snap40
     host: snap40
-    source_ip: 10.10.0.40
+    source_ip: 192.168.120.140
     source_mac: 00:25:90:c2:b1:c3
     feng_id: 39
   - name: snap41
     host: snap41
-    source_ip: 10.10.0.41
+    source_ip: 192.168.120.141
     source_mac: 00:25:90:c2:b1:c4
     feng_id: 40
   - name: snap42
     host: snap42
-    source_ip: 10.10.0.42
+    source_ip: 192.168.120.142
     source_mac: 00:25:90:c2:b1:c5
     feng_id: 41
   - name: snap43
     host: snap43
-    source_ip: 10.10.0.43
+    source_ip: 192.168.120.143
     source_mac: 00:25:90:c2:b1:c6
     feng_id: 42  
 
