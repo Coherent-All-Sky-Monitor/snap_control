@@ -95,27 +95,27 @@ boards:
   - name: snap148
     host: snap08
     source_ip: 192.168.120.108
-    source_mac: 00:25:90:c2:b1:a3
+    source_mac: 00:27:02:bb:18:05
     feng_id: 7
   - name: snap149
     host: snap09
     source_ip: 192.168.120.109
-    source_mac: 00:25:90:c2:b1:a4
+    source_mac: 00:35:19:87:18:05
     feng_id: 8
   - name: snap150
     host: snap10
     source_ip: 192.168.120.110
-    source_mac: 00:25:90:c2:b1:a5
+    source_mac: 00:25:aa:3e:18:05
     feng_id: 9  
   - name: snap151
     host: snap11
     source_ip: 192.168.120.111
-    source_mac: 00:25:90:c2:b1:a6
+    source_mac: 00:23:d6:45:18:05
     feng_id: 10
   - name: snap152
     host: snap12
     source_ip: 192.168.120.112
-    source_mac: 00:25:90:c2:b1:a7
+    source_mac: 00:29:c4:e8:18:05
     feng_id: 11
   - name: snap153
     host: snap13
