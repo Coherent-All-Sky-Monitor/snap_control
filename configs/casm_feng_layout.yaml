@@ -242,32 +242,32 @@ boards:
     source_ip: 192.168.120.137
     source_mac: 00:25:90:c2:b1:c0
     feng_id: 36
-  - name: snap38
+  - name: snap099
     host: snap38
     source_ip: 192.168.120.138
     source_mac: 00:25:90:c2:b1:c1
     feng_id: 37
-  - name: snap39
+  - name: snap100
     host: snap39
     source_ip: 192.168.120.139
     source_mac: 00:25:90:c2:b1:c2
     feng_id: 38
-  - name: snap40
+  - name: snap062
     host: snap40
     source_ip: 192.168.120.140
     source_mac: 00:25:90:c2:b1:c3
     feng_id: 39
-  - name: snap41
+  - name: snap072
     host: snap41
     source_ip: 192.168.120.141
     source_mac: 00:25:90:c2:b1:c4
     feng_id: 40
-  - name: snap42
+  - name: snap064
     host: snap42
     source_ip: 192.168.120.142
     source_mac: 00:25:90:c2:b1:c5
     feng_id: 41
-  - name: snap43
+  - name: snap084
     host: snap43
     source_ip: 192.168.120.143
     source_mac: 00:25:90:c2:b1:c6
