@@ -101,7 +101,8 @@ def _configure_board(board: dict, common: dict,
                      snap_ip: Optional[str], 
                      programmed: Optional[bool],
                      feng_id: Optional[int], 
-                     test_mode: Optional[str]) -> None:
+                     test_mode: Optional[str],
+                     adc_gain: Optional[int]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
     host = board["host"]
 
@@ -165,6 +166,9 @@ def _configure_board(board: dict, common: dict,
         snap.adc.initialize()
         snap.program(fpgfile, initialize_adc=True)
 
+    if adc_gain is not None:
+        snap.adc.adc.set_gain(adc_gain)
+
     snap.configure(
         source_ip=source_ip,
         source_port=source_port,
@@ -210,7 +214,11 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
-    ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", choices=["zeros", "noise", "counter"])
+    ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", 
+    choices=["zeros", "noise", "counter"])
+    ap.add_argument("--adc_gain", type=int, default=None, 
+    help="ADC gain for the SNAP must be one of: 1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50.", 
+    choices=[1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50])
     return ap.parse_args()
 
 def main() -> None:  # pragma: no cover
@@ -230,7 +238,9 @@ def main() -> None:  # pragma: no cover
         for kk, ip in enumerate(args.ip):
             try:
                 _configure_board(boards[0], common, args.nchan_packet, 
-                                 ip, programmed=args.programmed, feng_id=kk, test_mode=args.test_mode)
+                                 ip, programmed=args.programmed, 
+                                 feng_id=kk, test_mode=args.test_mode,
+                                 adc_gain=args.adc_gain)
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
@@ -238,7 +248,8 @@ def main() -> None:  # pragma: no cover
     elif args.ip is None:
         for board in boards:
             try:
-                _configure_board(board, common, args.nchan_packet, test_mode=args.test_mode)
+                _configure_board(board, common, args.nchan_packet, test_mode=args.test_mode,
+                                 adc_gain=args.adc_gain)
             except Exception:
                 LOGGER.exception("Configuration failed for board %s", board.get("host"))
                 continue
