@@ -167,6 +167,7 @@ def _configure_board(board: dict, common: dict,
         snap.program(fpgfile, initialize_adc=True)
 
     if adc_gain is not None:
+        LOGGER.info("Setting ADC gain to %d", adc_gain)
         snap.adc.adc.set_gain(adc_gain)
 
     snap.configure(
