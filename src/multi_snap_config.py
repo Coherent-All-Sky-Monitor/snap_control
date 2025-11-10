@@ -217,7 +217,7 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
     ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", 
     choices=["zeros", "noise", "counter"])
-    ap.add_argument("--adc_gain", type=int, default=None, 
+    ap.add_argument("--adc_gain", type=float, default=None, 
     help="ADC gain for the SNAP must be one of: 1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50.", 
     choices=[1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50])
     return ap.parse_args()
