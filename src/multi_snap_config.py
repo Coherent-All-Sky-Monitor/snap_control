@@ -114,11 +114,6 @@ def _configure_board(board: dict, common: dict,
     source_port = int(common.get("source_port", 10000))
     nchan_packet = int(common.get("nchan_packet", nchan_packet_cli or 512))
     nchan_default = int(common.get("nchan", nchan_packet))
-    
-    if eq_coeffs is not None:
-        eq_coeffs_arr = np.ones([12, 512]) * eq_coeffs
-    else:
-        eq_coeffs_arr = None
 
     if snap_ip:
         source_ip = snap_ip
@@ -149,6 +144,9 @@ def _configure_board(board: dict, common: dict,
         )
         macs[ip] = _mac_to_int(dest["mac"])
 
+    # Connecting to the SNAP. This connects to the SNAP
+    # and uploads the bitstream to the SNAP. We do this before casm_f.snap_fengine.SnapFengine
+    # because it doesn't work with the max_time_delay error.
     if programmed is False:
         LOGGER.info("Connecting to %s at IP=%s …" % (host,source_ip))
         snap = CasperFpga(source_ip, transport=TapcpTransport)
@@ -166,6 +164,8 @@ def _configure_board(board: dict, common: dict,
         len(dests),
     )
 
+    # Programming the SNAP. This is the main function that programs the SNAP
+    # and initializes the ADC.
     try:
         snap.program(fpgfile, initialize_adc=True)
         print("Finished on attempt %d" % adc_attempts)
@@ -178,6 +178,8 @@ def _configure_board(board: dict, common: dict,
         LOGGER.info("Setting ADC gain to %d", adc_gain)
         snap.adc.adc.set_gain(adc_gain)
 
+    # Configuring the SNAP. This is the main function that configures the SNAP
+    # and begins the streaming of data to the destinations.
     snap.configure(
         source_ip=source_ip,
         source_port=source_port,
@@ -188,8 +190,11 @@ def _configure_board(board: dict, common: dict,
         enable_tx=True,
         feng_id=feng_id,
         fft_shift=fft_shift,
-        eq=eq_coeffs_arr, 
     )
+
+    # Setting the EQ coefficients
+    if eq_coeffs is not None:
+        [snap.eq.set_coeffs(ii, eq_coeffs*np.ones([512])) for ii in range(12)]
 
     if test_mode is not None:
         if test_mode == "zeros":
