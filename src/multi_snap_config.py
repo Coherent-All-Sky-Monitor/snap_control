@@ -116,7 +116,7 @@ def _configure_board(board: dict, common: dict,
     nchan_default = int(common.get("nchan", nchan_packet))
     
     if eq_coeffs is not None:
-        eq_coeffs_arr = np.ones([512]) * eq_coeffs
+        eq_coeffs_arr = np.ones([12, 512]) * eq_coeffs
     else:
         eq_coeffs_arr = None
 
