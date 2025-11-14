@@ -102,7 +102,9 @@ def _configure_board(board: dict, common: dict,
                      programmed: Optional[bool],
                      feng_id: Optional[int], 
                      test_mode: Optional[str],
-                     adc_gain: Optional[int]) -> None:
+                     adc_gain: Optional[int],
+                     eq_coeffs: Optional[float],
+                     fft_shift: Optional[int]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
     host = board["host"]
 
@@ -112,6 +114,11 @@ def _configure_board(board: dict, common: dict,
     nchan_packet = int(common.get("nchan_packet", nchan_packet_cli or 512))
     nchan_default = int(common.get("nchan", nchan_packet))
     
+    if eq_coeffs is not None:
+        eq_coeffs_arr = np.ones([512]) * eq_coeffs
+    else:
+        eq_coeffs_arr = None
+
     if snap_ip:
         source_ip = snap_ip
         # Obtaining SNAP board mac
@@ -179,6 +186,8 @@ def _configure_board(board: dict, common: dict,
         nchan_packet=nchan_packet,
         enable_tx=True,
         feng_id=feng_id,
+        fft_shift=fft_shift,
+        eq=eq_coeffs_arr, 
     )
 
     if test_mode is not None:
@@ -217,6 +226,8 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
     ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", 
     choices=["zeros", "noise", "counter"])
+    ap.add_argument("--fft_shift", type=int, default=None, help="FFT shift for the SNAP")
+    ap.add_argument("--eq_coeffs", type=int, default=None, help="EQ coefficients for the SNAP")
     ap.add_argument("--adc_gain", type=float, default=None, 
     help="ADC gain for the SNAP must be one of: 1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50.", 
     choices=[1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50])
@@ -241,7 +252,9 @@ def main() -> None:  # pragma: no cover
                 _configure_board(boards[0], common, args.nchan_packet, 
                                  ip, programmed=args.programmed, 
                                  feng_id=kk, test_mode=args.test_mode,
-                                 adc_gain=args.adc_gain)
+                                 adc_gain=args.adc_gain,
+                                 eq_coeffs=args.eq_coeffs,
+                                 fft_shift=args.fft_shift)
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
@@ -250,7 +263,9 @@ def main() -> None:  # pragma: no cover
         for board in boards:
             try:
                 _configure_board(board, common, args.nchan_packet, test_mode=args.test_mode,
-                                 adc_gain=args.adc_gain)
+                                 adc_gain=args.adc_gain,
+                                 eq_coeffs=args.eq_coeffs,
+                                 fft_shift=args.fft_shift)
             except Exception:
                 LOGGER.exception("Configuration failed for board %s", board.get("host"))
                 continue
