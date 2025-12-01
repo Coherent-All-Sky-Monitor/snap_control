@@ -72,6 +72,30 @@ def _mac_to_int(mac: Union[str, int]) -> int:
         return int(mac, 16)
     return int(mac.replace(":", ""), 16)
 
+def _set_gain(adc, gain): 
+    # ADC is an HMCAD1511 object
+
+    """
+    Set the coarse gain of the ADC. Allowed values
+    are 1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50.
+    """
+    gain_map = {
+            1    : 0b0000,
+            1.25 : 0b0001,
+            2    : 0b0010,
+            2.5  : 0b0011,
+            4    : 0b0100,
+            5    : 0b0101,
+            8    : 0b0110,
+            10   : 0b0111,
+            12.5 : 0b1000,
+            16   : 0b1001,
+            20   : 0b1010,
+            25   : 0b1011,
+            32   : 0b1100,
+            50   : 0b1101
+    }
+    adc.write(gain_map[gain] * 0x1111, 0x2A) 
 
 def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
     """Load YAML from *path_like* (``str`` or ``Path``).
@@ -176,7 +200,7 @@ def _configure_board(board: dict, common: dict,
 
     if adc_gain is not None:
         LOGGER.info("Setting ADC gain to %d", adc_gain)
-        snap.adc.adc.set_gain(adc_gain)
+        _set_gain(snap.adc.adc.adc, adc_gain)
 
     # Configuring the SNAP. This is the main function that configures the SNAP
     # and begins the streaming of data to the destinations.
@@ -215,6 +239,8 @@ def _configure_board(board: dict, common: dict,
         eth_status["tx_ctr"],
         flags,
     )
+
+
 
 # -----------------------------------------------------------------------------
 # CLI
