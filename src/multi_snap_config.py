@@ -158,7 +158,7 @@ def level(snap, ncoeffs=512, default_coeff=2.5):
 
             coeffs = 2.5*4./data_smooth_voltage
 
-            snap.logger.error("min "+str(coeffs.min())+" max "+str(coeffs.max()))
+            LOGGER.info("min "+str(coeffs.min())+" max "+str(coeffs.max()))
             snap.eq.set_coeffs(int(st),coeffs)
             LOGGER.info("Set coeffs for stream "+str(st))
         except:
@@ -248,6 +248,13 @@ def _configure_board(board: dict, common: dict,
         LOGGER.info("Setting ADC gain to %d", adc_gain)
         _set_gain(snap.adc.adc.adc, adc_gain)
 
+
+    # Setting the EQ coefficients
+    if eq_coeffs is not None:
+        [snap.eq.set_coeffs(ii, eq_coeffs*np.ones([512])) for ii in range(12)]
+    else:
+        level(snap, ncoeffs=512, default_coeff=2.5)
+
     # Configuring the SNAP. This is the main function that configures the SNAP
     # and begins the streaming of data to the destinations.
     snap.configure(
@@ -262,10 +269,7 @@ def _configure_board(board: dict, common: dict,
         fft_shift=fft_shift,
     )
 
-    # Setting the EQ coefficients
-    if eq_coeffs is not None:
-        [snap.eq.set_coeffs(ii, eq_coeffs*np.ones([512])) for ii in range(12)]
-
+    # Setting the input mode
     if test_mode is not None:
         if test_mode == "zeros":
             snap.input.use_zero()
