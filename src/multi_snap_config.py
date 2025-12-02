@@ -164,8 +164,8 @@ def level(snap, ncoeffs=512, default_coeff=2.5):
             LOGGER.info("Set coeffs for stream "+str(st))
         except:
             LOGGER.error("Could not set Eq coeffs for input "+str(st))
-            LOGGER.error("min "+str(coeffs.min())+" max "+str(coeffs.max()))
             snap.eq.set_coeffs(int(st),default_coeff+np.zeros(ncoeffs))
+
     LOGGER.info("Finished level control")
 
 def _configure_board(board: dict, common: dict, 
