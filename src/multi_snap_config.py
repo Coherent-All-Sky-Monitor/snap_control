@@ -250,14 +250,6 @@ def _configure_board(board: dict, common: dict,
         _set_gain(snap.adc.adc.adc, adc_gain)
 
 
-    # Setting the EQ coefficients
-    if eq_coeffs is not None:
-        # Set to a fixed value
-        [snap.eq.set_coeffs(ii, eq_coeffs*np.ones([512])) for ii in range(12)]
-    else:
-        # Flatten the bandpass
-        level(snap, ncoeffs=512, default_coeff=2.5)
-
     # Configuring the SNAP. This is the main function that configures the SNAP
     # and begins the streaming of data to the destinations.
     snap.configure(
@@ -271,6 +263,14 @@ def _configure_board(board: dict, common: dict,
         feng_id=feng_id,
         fft_shift=fft_shift,
     )
+
+    # Setting the EQ coefficients
+    if eq_coeffs is not None:
+        # Set to a fixed value
+        [snap.eq.set_coeffs(ii, eq_coeffs*np.ones([512])) for ii in range(12)]
+    else:
+        # Flatten the bandpass
+        level(snap, ncoeffs=512, default_coeff=2.5)
 
     # Setting the input mode
     if test_mode is not None:
