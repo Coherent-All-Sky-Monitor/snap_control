@@ -251,8 +251,10 @@ def _configure_board(board: dict, common: dict,
 
     # Setting the EQ coefficients
     if eq_coeffs is not None:
+        # Set to a fixed value
         [snap.eq.set_coeffs(ii, eq_coeffs*np.ones([512])) for ii in range(12)]
     else:
+        # Flatten the bandpass
         level(snap, ncoeffs=512, default_coeff=2.5)
 
     # Configuring the SNAP. This is the main function that configures the SNAP
