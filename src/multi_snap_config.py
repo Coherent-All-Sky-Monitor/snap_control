@@ -45,6 +45,7 @@ from typing import Dict, List
 from subprocess import Popen, PIPE
 import re
 import yaml  # PyYAML
+from scipy.signal import savgol_filter
 
 # CASM library import — errors out cleanly if missing
 try:
