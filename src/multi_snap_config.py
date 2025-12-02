@@ -123,7 +123,9 @@ def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
 
 def level(snap, ncoeffs=512, default_coeff=2.5):
     """ Flattens the bandpass using the eq_coeffs. 
-        Will only work if armed.
+        Will only work if armed. Based on Vikram's DSA-110 code.
+
+        https://github.com/dsa110/SNAP_control/blob/master/SNAP_control/dsaX_snap.py
 
     Args:
         snap: The snap object
