@@ -34,10 +34,10 @@ Requirements
 
 """
 from __future__ import annotations
+from tkinter import N
 
 import numpy as np
 import argparse
-import ipaddress
 import logging
 import sys
 from pathlib import Path
@@ -120,6 +120,50 @@ def _load_layout(path_like: Union[str, Path]) -> Tuple[dict, List[dict]]:
 # -----------------------------------------------------------------------------
 # Configuration logic
 # -----------------------------------------------------------------------------
+
+def level(snap, ncoeffs=512, default_coeff=2.5):
+    """ Flattens the bandpass using the eq_coeffs. 
+        Will only work if armed.
+
+    Args:
+        snap: The snap object
+        ncoeffs: The number of coefficients to use
+        default_coeff: The default coefficient to use
+
+    Returns:
+        None
+    """
+
+    ### TODO: multithread this
+    
+    snap.corr.set_acc_len(50000)
+    LOGGER.info("Set acc len to 50k")
+    LOGGER.info("Starting level control iterating over %d inputs", snap.n_inputs)
+
+    for st in range(snap.n_inputs):
+        LOGGER.info("Setting EQ coefficients for stream "+str(st))
+        data = np.zeros(4096)
+
+        for ii in range(4):
+            bp = np.real(snap.corr.get_new_corr(int(st),int(st)))
+            bp[np.where(bp==0.0)] = np.median(bp)
+            data += bp
+
+        try:
+            data_smooth = savgol_filter(data, 32, 3)[4::8]
+            data_smooth[data_smooth<=0.0] = np.median(data_smooth[data_smooth>0.0])
+            data_smooth_voltage = np.sqrt(data_smooth)
+
+            coeffs = 2.5*4./data_smooth_voltage
+
+            snap.logger.error("min "+str(coeffs.min())+" max "+str(coeffs.max()))
+            snap.eq.set_coeffs(int(st),coeffs)
+            LOGGER.info("Set coeffs for stream "+str(st))
+        except:
+            LOGGER.error("Could not set Eq coeffs for input "+str(st))
+            LOGGER.error("min "+str(coeffs.min())+" max "+str(coeffs.max()))
+            snap.eq.set_coeffs(int(st),default_coeff+np.zeros(ncoeffs))
+    LOGGER.info("Finished level control")
 
 def _configure_board(board: dict, common: dict, 
                      nchan_packet_cli: Optional[int], 
