@@ -1,0 +1,38 @@
+#
+# Preferred arguments for multi_snap_config.py
+# Adjust these values to match your deployment.
+#
+
+# Path to the CASM F-engine layout YAML used by multi_snap_config.py
+layout_yaml: "configs/casm_feng_layout.yaml"
+
+# List of SNAP IPs to configure. If empty or omitted, the script will use
+# the boards listed in layout_yaml instead.
+ips:
+  - "192.168.0.126"
+
+# Optional overrides for CLI flags of multi_snap_config.py
+options:
+  # Override common.nchan_packet (int, or null to leave default)
+  nchan_packet: 512
+
+  # Logging level: one of DEBUG, INFO, WARNING, ERROR
+  log_level: "INFO"
+
+  # Whether to program the SNAP FPGA before configuring (maps to --programmed)
+  programmed: False
+
+  # Test mode: one of "zeros", "noise", "counter", or null for normal operation
+  test_mode: null
+
+  # FFT shift (int or null)
+  fft_shift: null
+
+  # EQ coefficients (float or null. null will flatten the bandpass)
+  eq_coeffs: null
+
+  # ADC gain (float or null), must be one of:
+  # 1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50
+  adc_gain: 8
+
+
