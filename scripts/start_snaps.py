@@ -20,7 +20,6 @@ import yaml  # PyYAML
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import multi_snap_config  # type: ignore
 
-
 def _load_startup_config(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as fh:
         cfg = yaml.safe_load(fh) or {}

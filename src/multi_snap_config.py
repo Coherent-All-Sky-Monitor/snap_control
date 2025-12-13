@@ -34,7 +34,7 @@ Requirements
 
 """
 from __future__ import annotations
-from tkinter import N
+#from tkinter import N, 
 
 import numpy as np
 import argparse
