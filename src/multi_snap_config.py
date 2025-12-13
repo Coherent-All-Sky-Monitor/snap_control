@@ -215,6 +215,19 @@ def _configure_board(board: dict, common: dict,
         )
         macs[ip] = _mac_to_int(dest["mac"])
 
+    print(macs)
+    print(dests)
+    print(source_ip)
+    print(source_port)
+    print(feng_id)
+    print(fpgfile)
+    print(programmed)
+    print(test_mode)
+    print(adc_gain)
+    print(eq_coeffs)
+    print(fft_shift)
+    exit()
+
     # Connecting to the SNAP. This connects to the SNAP
     # and uploads the bitstream to the SNAP. We do this before casm_f.snap_fengine.SnapFengine
     # because it doesn't work with the max_time_delay error.
