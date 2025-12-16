@@ -342,7 +342,7 @@ def main() -> None:  # pragma: no cover
             try:
                 _configure_board(boards[0], common, args.nchan_packet, 
                                  ip, programmed=args.programmed, 
-                                 feng_id=kk, test_mode=args.test_mode,
+                                 feng_id=feng_id, test_mode=args.test_mode,
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
                                  fft_shift=args.fft_shift, 
