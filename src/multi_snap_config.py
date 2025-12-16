@@ -312,6 +312,7 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
     ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", 
     choices=["zeros", "noise", "counter"])
+    ap.add_argument("--feng_id", type=int, default=None, help="Feng ID for the SNAP")
     ap.add_argument("--fft_shift", type=int, default=None, help="FFT shift for the SNAP")
     ap.add_argument("--eq_coeffs", type=int, default=None, help="EQ coefficients for the SNAP")
     ap.add_argument("--adc_gain", type=float, default=None, 
@@ -340,7 +341,8 @@ def main() -> None:  # pragma: no cover
                                  feng_id=kk, test_mode=args.test_mode,
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
-                                 fft_shift=args.fft_shift)
+                                 fft_shift=args.fft_shift, 
+                                 feng_id=args.feng_id)
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
@@ -351,7 +353,8 @@ def main() -> None:  # pragma: no cover
                 _configure_board(board, common, args.nchan_packet, test_mode=args.test_mode,
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
-                                 fft_shift=args.fft_shift)
+                                 fft_shift=args.fft_shift,
+                                 feng_id=args.feng_id)
             except Exception:
                 LOGGER.exception("Configuration failed for board %s", board.get("host"))
                 continue
