@@ -335,6 +335,10 @@ def main() -> None:  # pragma: no cover
     # If IP addresses are provided, configure the board with the given IP address
     if args.ip is not None:
         for kk, ip in enumerate(args.ip):
+            if args.feng_id is not None:
+                feng_id = args.feng_id
+            else:
+                feng_id = kk
             try:
                 _configure_board(boards[0], common, args.nchan_packet, 
                                  ip, programmed=args.programmed, 
@@ -342,7 +346,7 @@ def main() -> None:  # pragma: no cover
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
                                  fft_shift=args.fft_shift, 
-                                 feng_id=args.feng_id)
+                                 )
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
