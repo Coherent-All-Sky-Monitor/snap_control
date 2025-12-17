@@ -251,9 +251,9 @@ def _configure_board(board: dict, common: dict,
         _set_gain(snap.adc.adc.adc, adc_gain)
 
     LOGGER.info("Arming sync")
-    snap.sync.wait_for_pps()
-    snap.sync.load_telescope_time(0, software_load=False)
-    snap.sync.arm_sync()
+#    snap.sync.wait_for_pps()
+#    snap.sync.load_telescope_time(0, software_load=False)
+#    snap.sync.arm_sync()
     LOGGER.info("Sync armed")
     
     # Configuring the SNAP. This is the main function that configures the SNAP
