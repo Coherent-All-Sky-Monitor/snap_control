@@ -176,7 +176,8 @@ def _configure_board(board: dict, common: dict,
                      test_mode: Optional[str],
                      adc_gain: Optional[int],
                      eq_coeffs: Optional[float],
-                     fft_shift: Optional[int]) -> None:
+                     fft_shift: Optional[int],
+                     do_arm_sync: Optional[bool]) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
     host = board["host"]
 
@@ -215,6 +216,16 @@ def _configure_board(board: dict, common: dict,
         )
         macs[ip] = _mac_to_int(dest["mac"])
 
+    print(source_ip)
+    print(source_port)
+    print(dests)
+    print(macs)
+    print(feng_id)
+    print(fft_shift)
+    print(eq_coeffs)
+    print(adc_gain)
+    print(do_arm_sync)
+    exit()
 
     # Connecting to the SNAP. This connects to the SNAP
     # and uploads the bitstream to the SNAP. We do this before casm_f.snap_fengine.SnapFengine
@@ -253,8 +264,10 @@ def _configure_board(board: dict, common: dict,
     LOGGER.info("Arming sync")
     snap.sync.wait_for_sync()
     snap.sync.load_telescope_time(0, software_load=False)
-    snap.sync.arm_sync()
-    LOGGER.info("Sync armed")
+
+    if do_arm_sync is True:
+        snap.sync.arm_sync()
+        LOGGER.info("Sync armed")
     
     # Configuring the SNAP. This is the main function that configures the SNAP
     # and begins the streaming of data to the destinations.
