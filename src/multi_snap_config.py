@@ -177,7 +177,7 @@ def _configure_board(board: dict, common: dict,
                      adc_gain: Optional[int],
                      eq_coeffs: Optional[float],
                      fft_shift: Optional[int],
-                     do_arm_sync: Optional[bool]) -> None:
+                     ) -> None:
     """Configure one SNAP board using *common* defaults + *board* overrides."""
     host = board["host"]
 
@@ -224,7 +224,6 @@ def _configure_board(board: dict, common: dict,
     print(fft_shift)
     print(eq_coeffs)
     print(adc_gain)
-    print(do_arm_sync)
     exit()
 
     # Connecting to the SNAP. This connects to the SNAP
@@ -265,9 +264,9 @@ def _configure_board(board: dict, common: dict,
     snap.sync.wait_for_sync()
     snap.sync.load_telescope_time(0, software_load=False)
 
-    if do_arm_sync is True:
-        snap.sync.arm_sync()
-        LOGGER.info("Sync armed")
+    # if do_arm_sync is True:
+    #     snap.sync.arm_sync()
+    #     LOGGER.info("Sync armed")
     
     # Configuring the SNAP. This is the main function that configures the SNAP
     # and begins the streaming of data to the destinations.
