@@ -224,7 +224,6 @@ def _configure_board(board: dict, common: dict,
     print(fft_shift)
     print(eq_coeffs)
     print(adc_gain)
-    exit()
 
     # Connecting to the SNAP. This connects to the SNAP
     # and uploads the bitstream to the SNAP. We do this before casm_f.snap_fengine.SnapFengine
@@ -261,8 +260,8 @@ def _configure_board(board: dict, common: dict,
         _set_gain(snap.adc.adc.adc, adc_gain)
 
     LOGGER.info("Arming sync")
-    snap.sync.wait_for_sync()
-    snap.sync.load_telescope_time(0, software_load=False)
+#    snap.sync.wait_for_sync()
+#    snap.sync.load_telescope_time(0, software_load=False)
 
     # if do_arm_sync is True:
     #     snap.sync.arm_sync()
