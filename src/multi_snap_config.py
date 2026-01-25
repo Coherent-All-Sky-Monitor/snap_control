@@ -46,6 +46,7 @@ from subprocess import Popen, PIPE
 import re
 import yaml  # PyYAML
 from scipy.signal import savgol_filter
+from concurrent.futures import ThreadPoolExecutor
 
 # CASM library import — errors out cleanly if missing
 try:
@@ -216,15 +217,6 @@ def _configure_board(board: dict, common: dict,
         )
         macs[ip] = _mac_to_int(dest["mac"])
 
-    print(source_ip)
-    print(source_port)
-    print(dests)
-    print(macs)
-    print(feng_id)
-    print(fft_shift)
-    print(eq_coeffs)
-    print(adc_gain)
-
     # Connecting to the SNAP. This connects to the SNAP
     # and uploads the bitstream to the SNAP. We do this before casm_f.snap_fengine.SnapFengine
     # because it doesn't work with the max_time_delay error.
@@ -259,13 +251,6 @@ def _configure_board(board: dict, common: dict,
         LOGGER.info("Setting ADC gain to %d", adc_gain)
         _set_gain(snap.adc.adc.adc, adc_gain)
 
-    LOGGER.info("Arming sync")
-#    snap.sync.wait_for_sync()
-#    snap.sync.load_telescope_time(0, software_load=False)
-
-    # if do_arm_sync is True:
-    #     snap.sync.arm_sync()
-    #     LOGGER.info("Sync armed")
     
     # Configuring the SNAP. This is the main function that configures the SNAP
     # and begins the streaming of data to the destinations.
@@ -276,7 +261,7 @@ def _configure_board(board: dict, common: dict,
         dests=dests,
         macs=macs,
         nchan_packet=nchan_packet,
-        enable_tx=True,
+        enable_tx=False,
         feng_id=feng_id,
         fft_shift=fft_shift,
     )
@@ -310,7 +295,44 @@ def _configure_board(board: dict, common: dict,
         flags,
     )
 
+    return snap
 
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+def concurrently(snaps, fn):
+    """
+    Run the given function concurrently on the given snaps
+    """
+    with ThreadPoolExecutor(max_workers=len(snaps)) as ex:
+        return list(ex.map(fn, snaps))
+
+def program_init(snaps, fpgfile):
+    """
+    Program the FPGAs and initialize the snaps using the given fpgfile
+    """
+    def one(s):
+        s.program(fpgfile)                    # program .fpg (and ADC trains if enabled)
+        s.initialize()         # init blocks + global reset
+        return s.hostname
+    return concurrently(snaps, one)
+
+def pps_two_ticks_ok(s):
+    # get_tt_of_pps(wait_for_sync=True) returns (tt, sync_number) for PPS:contentReference[oaicite:5]{index=5}
+    tt0, n0 = s.sync.get_tt_of_pps(wait_for_sync=True)
+    tt1, n1 = s.sync.get_tt_of_pps(wait_for_sync=True)
+    return (tt0, n0), (tt1, n1), (n1 == n0 + 1)
+
+def sync_time_using_update_telescope_time(snaps):
+    # Robust PPS-locked load; uses count_pps to ensure no PPS during compute:contentReference[oaicite:6]{index=6}
+    concurrently(snaps, lambda s: s.sync.update_telescope_time())
+    # Wait for the PPS edge that *performs* the load
+    snaps[0].sync.get_tt_of_pps(wait_for_sync=True)
+
+def verify(snaps):
+    periods = concurrently(snaps, lambda s: s.sync.period_pps())  # :contentReference[oaicite:7]{index=7}
+    lastpps = concurrently(snaps, lambda s: s.sync.get_tt_of_pps(wait_for_sync=False))
+    return periods, lastpps
 
 # -----------------------------------------------------------------------------
 # CLI
@@ -350,31 +372,38 @@ def main() -> None:  # pragma: no cover
     
     # If IP addresses are provided, configure the board with the given IP address
     if args.ip is not None:
+        snaps = []
         for kk, ip in enumerate(args.ip):
             if args.feng_id is not None:
                 feng_id = args.feng_id
             else:
                 feng_id = kk
             try:
-                _configure_board(boards[0], common, args.nchan_packet, 
+                snap = _configure_board(boards[0], common, args.nchan_packet, 
                                  ip, programmed=args.programmed, 
                                  feng_id=feng_id, test_mode=args.test_mode,
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
                                  fft_shift=args.fft_shift, 
                                  )
+                snaps.append(snap)
+
             except Exception:
                 LOGGER.exception("Configuration failed for IP %s", ip)
                 continue
+        LOGGER.info(f"Configured {len(snaps)} boards")
+
     # If no IP addresses are provided, configure all boards from the yaml file
     elif args.ip is None:
+        snaps = []
         for board in boards:
             try:
-                _configure_board(board, common, args.nchan_packet, test_mode=args.test_mode,
+                snap = _configure_board(board, common, args.nchan_packet, test_mode=args.test_mode,
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
                                  fft_shift=args.fft_shift,
                                  feng_id=args.feng_id)
+                snaps.append(snap)
             except Exception:
                 LOGGER.exception("Configuration failed for board %s", board.get("host"))
                 continue
@@ -383,7 +412,26 @@ def main() -> None:  # pragma: no cover
                 exit()
             break
 
-    LOGGER.info("All requested boards processed.")
+    LOGGER.info(f"All requested boards processed. {len(snaps)} boards configured.")
+
+    # PPS presence sanity
+    checks = concurrently(snaps, pps_two_ticks_ok)
+    for s, ((tt0,n0),(tt1,n1),ok) in zip(snaps, checks):
+        print(f"{s.hostname}: PPS tick check ok={ok}  (tt,n): ({tt0},{n0}) -> ({tt1},{n1})")
+
+    # Robust alignment to PPS-locked telescope time
+    sync_time_using_update_telescope_time(snaps)
+
+    # Verify
+    periods, lastpps = verify(snaps)
+    print("period_pps:", {s.hostname: p for s,p in zip(snaps, periods)})
+    print("get_tt_of_pps:", {s.hostname: v for s,v in zip(snaps, lastpps)})
+
+    # Convenience: print TT delta in clocks and seconds
+    (ttA, nA), (ttB, nB) = lastpps
+    dclks = ttA - ttB
+    print("PPS count:", nA, nB, "  TT delta [clks]:", dclks)
+    print("TT delta [s] ~", dclks / float(periods[0]))
 
 
 if __name__ == "__main__":  # pragma: no cover
