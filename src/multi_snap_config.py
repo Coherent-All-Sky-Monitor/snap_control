@@ -350,8 +350,9 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
     ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", 
     choices=["zeros", "noise", "counter"])
-    ap.add_argument("--feng_id", type=int, default=None, help="Feng ID for the SNAP")
     ap.add_argument("--fft_shift", type=int, default=None, help="FFT shift for the SNAP")
+    ap.add_argument("--feng_id", type=str, nargs='+', help="Feng ID(s) for the SNAP", 
+                    default=None)
     ap.add_argument("--eq_coeffs", type=int, default=None, help="EQ coefficients for the SNAP")
     ap.add_argument("--adc_gain", type=float, default=None, 
     help="ADC gain for the SNAP must be one of: 1, 1.25, 2, 2.5, 4, 5, 8, 10, 12.5, 16, 20, 25, 32, 50.", 
@@ -375,7 +376,7 @@ def main() -> None:  # pragma: no cover
         snaps = []
         for kk, ip in enumerate(args.ip):
             if args.feng_id is not None:
-                feng_id = args.feng_id
+                feng_id = int(args.feng_id[kk])
             else:
                 feng_id = kk
             try:
