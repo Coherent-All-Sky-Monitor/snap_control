@@ -380,14 +380,13 @@ def main() -> None:  # pragma: no cover
             else:
                 feng_id = kk
             try:
-                # snap = _configure_board(boards[0], common, args.nchan_packet, 
-                #                  ip, programmed=args.programmed, 
-                #                  feng_id=feng_id, test_mode=args.test_mode,
-                #                  adc_gain=args.adc_gain,
-                #                  eq_coeffs=args.eq_coeffs,
-                #                  fft_shift=args.fft_shift, 
-                #                  )
-                snap = snap_fengine.SnapFengine(ip, use_microblaze=True)
+                snap = _configure_board(boards[0], common, args.nchan_packet, 
+                                 ip, programmed=args.programmed, 
+                                 feng_id=feng_id, test_mode=args.test_mode,
+                                 adc_gain=args.adc_gain,
+                                 eq_coeffs=args.eq_coeffs,
+                                 fft_shift=args.fft_shift, 
+                                 )
                 snaps.append(snap)
 
             except Exception:
