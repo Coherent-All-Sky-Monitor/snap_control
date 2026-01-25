@@ -426,14 +426,14 @@ def main() -> None:  # pragma: no cover
 
     # Verify
     periods, lastpps = verify(snaps)
-    LOGGER.info("period_pps:", {s.hostname: p for s,p in zip(snaps, periods)})
-    LOGGER.info("get_tt_of_pps:", {s.hostname: v for s,v in zip(snaps, lastpps)})
+    LOGGER.info("period_pps: %s", {s.hostname: p for s,p in zip(snaps, periods)})
+    LOGGER.info("get_tt_of_pps: %s", {s.hostname: v for s,v in zip(snaps, lastpps)})
 
     # Convenience: print TT delta in clocks and seconds
     (ttA, nA), (ttB, nB) = lastpps
     dclks = ttA - ttB
-    LOGGER.info("PPS count:", nA, nB, "  TT delta [clks]:", dclks)
-    LOGGER.info("TT delta [s] ~", dclks / float(periods[0]))
+    LOGGER.info("PPS count: %d %d  TT delta [clks]: %d", nA, nB, dclks)
+    LOGGER.info("TT delta [s] ~ %f", dclks / float(periods[0]))
 
     for snap in snaps:
         snap.eth.enable_tx()
