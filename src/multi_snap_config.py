@@ -346,6 +346,7 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--ip", type=str, nargs='+', help="IP address(es) of the SNAP to configure (single or multiple)", 
                     default=None)
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
+    ap.add_argument("--do_sync", action="store_true", help="Do sync after configuring")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
     ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", 
@@ -415,28 +416,29 @@ def main() -> None:  # pragma: no cover
 
     LOGGER.info(f"All requested boards processed. {len(snaps)} boards configured.")
 
-    # PPS presence sanity
-    checks = concurrently(snaps, pps_two_ticks_ok)
-    for s, ((tt0,n0),(tt1,n1),ok) in zip(snaps, checks):
-        print(f"{s.hostname}: PPS tick check ok={ok}  (tt,n): ({tt0},{n0}) -> ({tt1},{n1})")
+    if args.do_sync is True:
+        LOGGER.info("Doing sync")
+        # PPS presence sanity
+        checks = concurrently(snaps, pps_two_ticks_ok)
+        for s, ((tt0,n0),(tt1,n1),ok) in zip(snaps, checks):
+            print(f"{s.hostname}: PPS tick check ok={ok}  (tt,n): ({tt0},{n0}) -> ({tt1},{n1})")
 
-    # Robust alignment to PPS-locked telescope time
-    sync_time_using_update_telescope_time(snaps)
+        # Robust alignment to PPS-locked telescope time
+        sync_time_using_update_telescope_time(snaps)
 
-    # Verify
-    periods, lastpps = verify(snaps)
-    LOGGER.info("period_pps: %s", {s.hostname: p for s,p in zip(snaps, periods)})
-    LOGGER.info("get_tt_of_pps: %s", {s.hostname: v for s,v in zip(snaps, lastpps)})
+        # Verify
+        periods, lastpps = verify(snaps)
+        LOGGER.info("period_pps: %s", {s.hostname: p for s,p in zip(snaps, periods)})
+        LOGGER.info("get_tt_of_pps: %s", {s.hostname: v for s,v in zip(snaps, lastpps)})
 
-    # Convenience: print TT delta in clocks and seconds
-    (ttA, nA), (ttB, nB) = lastpps
-    dclks = ttA - ttB
-    LOGGER.info("PPS count: %d %d  TT delta [clks]: %d", nA, nB, dclks)
-    LOGGER.info("TT delta [s] ~ %f", dclks / float(periods[0]))
+        # Convenience: print TT delta in clocks and seconds
+        (ttA, nA), (ttB, nB) = lastpps
+        dclks = ttA - ttB
+        LOGGER.info("PPS count: %d %d  TT delta [clks]: %d", nA, nB, dclks)
+        LOGGER.info("TT delta [s] ~ %f", dclks / float(periods[0]))
 
     for snap in snaps:
         snap.eth.enable_tx()
-
 
 if __name__ == "__main__":  # pragma: no cover
      main()
