@@ -261,7 +261,7 @@ def _configure_board(board: dict, common: dict,
         dests=dests,
         macs=macs,
         nchan_packet=nchan_packet,
-        enable_tx=False,
+        enable_tx=True,
         feng_id=feng_id,
         fft_shift=fft_shift,
     )
@@ -400,7 +400,8 @@ def main() -> None:  # pragma: no cover
         snaps = []
         for board in boards:
             try:
-                snap = _configure_board(board, common, args.nchan_packet, test_mode=args.test_mode,
+                snap = _configure_board(board, common, args.nchan_packet, 
+                                programmed=args.programmed, test_mode=args.test_mode,
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
                                  fft_shift=args.fft_shift,
