@@ -399,8 +399,9 @@ def main() -> None:  # pragma: no cover
         snaps = []
         for board in boards:
             try:
-                snap = _configure_board(board, common, args.nchan_packet, 
-                                programmed=args.programmed, test_mode=args.test_mode,
+                snap = _configure_board(board, common, args.nchan_packet,
+                                 snap_ip=None,
+                                 programmed=args.programmed, test_mode=args.test_mode,
                                  adc_gain=args.adc_gain,
                                  eq_coeffs=args.eq_coeffs,
                                  fft_shift=args.fft_shift,
@@ -409,10 +410,6 @@ def main() -> None:  # pragma: no cover
             except Exception:
                 LOGGER.exception("Configuration failed for board %s", board.get("host"))
                 continue
-            else:
-                print("Invalid argument")
-                exit()
-            break
 
     LOGGER.info(f"All requested boards processed. {len(snaps)} boards configured.")
 
