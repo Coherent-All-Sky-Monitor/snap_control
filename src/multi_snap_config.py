@@ -241,7 +241,6 @@ def _configure_board(board: dict, common: dict,
     # and initializes the ADC.
     try:
         snap.program(fpgfile, initialize_adc=True)
-        print("Finished on attempt %d" % adc_attempts)
     except:
         print("Initial program failed. Attempting to initialize ADC.")
         snap.adc.initialize()
