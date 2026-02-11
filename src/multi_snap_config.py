@@ -47,6 +47,8 @@ import re
 import yaml  # PyYAML
 from scipy.signal import savgol_filter
 from concurrent.futures import ThreadPoolExecutor
+import time
+from concurrent.futures import ThreadPoolExecutor
 
 # CASM library import — errors out cleanly if missing
 try:
@@ -296,9 +298,6 @@ def _configure_board(board: dict, common: dict,
     )
 
     return snap
-
-import time
-from concurrent.futures import ThreadPoolExecutor
 
 def concurrently(snaps, fn):
     """
