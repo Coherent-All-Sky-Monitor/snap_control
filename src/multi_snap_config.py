@@ -239,13 +239,10 @@ def _configure_board(board: dict, common: dict,
     )
 
     time.sleep(10)
-    snap.program(fpgfile, initialize_adc=True)
-    exit()
     # Programming the SNAP. This is the main function that programs the SNAP
     # and initializes the ADC.
     try:
         snap.program(fpgfile, initialize_adc=True)
-        print("Finished on attempt %d" % adc_attempts)
     except:
         print("Initial program failed. Attempting to initialize ADC.")
         snap.adc.initialize()
