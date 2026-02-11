@@ -250,6 +250,7 @@ def _configure_board(board: dict, common: dict,
         LOGGER.info("Setting ADC gain to %d", adc_gain)
         _set_gain(snap.adc.adc.adc, adc_gain)
 
+    exit()
     
     # Configuring the SNAP. This is the main function that configures the SNAP
     # and begins the streaming of data to the destinations.
