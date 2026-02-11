@@ -261,7 +261,7 @@ def _configure_board(board: dict, common: dict,
         dests=dests,
         macs=macs,
         nchan_packet=nchan_packet,
-        enable_tx=True,
+        enable_tx=False,
         feng_id=feng_id,
         fft_shift=fft_shift,
     )
