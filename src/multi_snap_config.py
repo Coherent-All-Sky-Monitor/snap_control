@@ -428,11 +428,14 @@ def main() -> None:  # pragma: no cover
         LOGGER.info("period_pps: %s", {s.hostname: p for s,p in zip(snaps, periods)})
         LOGGER.info("get_tt_of_pps: %s", {s.hostname: v for s,v in zip(snaps, lastpps)})
 
-        # Convenience: print TT delta in clocks and seconds
-        (ttA, nA), (ttB, nB) = lastpps
-        dclks = ttA - ttB
-        LOGGER.info("PPS count: %d %d  TT delta [clks]: %d", nA, nB, dclks)
-        LOGGER.info("TT delta [s] ~ %f", dclks / float(periods[0]))
+        # Convenience: print TT delta in clocks and seconds vs reference board
+        tt_ref, n_ref = lastpps[0]
+        for s, (tt, n), period in zip(snaps, lastpps, periods):
+            dclks = tt - tt_ref
+            LOGGER.info(
+                "%s: PPS count=%d  TT delta vs %s [clks]: %d  [s]: %f",
+                s.hostname, n, snaps[0].hostname, dclks, dclks / float(period),
+            )
 
     for snap in snaps:
         snap.eth.enable_tx()
