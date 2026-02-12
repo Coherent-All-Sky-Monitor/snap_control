@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 
 common:
-  fpgfile: /home/user/connor/code/casm_snap_f/firmware/snap_f_12i_4kc/outputs/snap_f_12i_4kc_2025-05-08_1446.fpg    # Bitstream programmed to every board
+  fpgfile: /home/user/software/casm_snap_f/firmware/snap_f_12i_4kc/outputs/snap_f_12i_4kc_2024-11-11_2049.fpg    # Bitstream programmed to every board
   source_port: 10000                         # UDP source port on all SNAPs
   nic: eth0                                  # Down‑stream 100‑GbE NIC name (identical for all boards)
   nchan: 512                                 # Channels each board streams per destination
