@@ -48,7 +48,6 @@ import yaml  # PyYAML
 from scipy.signal import savgol_filter
 from concurrent.futures import ThreadPoolExecutor
 import time
-from concurrent.futures import ThreadPoolExecutor
 
 # CASM library import — errors out cleanly if missing
 try:
@@ -165,7 +164,7 @@ def level(snap, ncoeffs=512, default_coeff=2.5):
             LOGGER.info("min "+str(coeffs.min())+" max "+str(coeffs.max()))
             snap.eq.set_coeffs(int(st),coeffs)
             LOGGER.info("Set coeffs for stream "+str(st))
-        except:
+        except Exception:
             LOGGER.error("Could not set Eq coeffs for input "+str(st))
             snap.eq.set_coeffs(int(st),default_coeff+np.zeros(ncoeffs))
 
@@ -245,7 +244,7 @@ def _configure_board(board: dict, common: dict,
     # and initializes the ADC.
     try:
         snap.program(fpgfile, initialize_adc=True)
-    except:
+    except Exception:
         print("Initial program failed. Attempting to initialize ADC.")
         snap.adc.initialize()
         snap.program(fpgfile, initialize_adc=True)
@@ -323,14 +322,20 @@ def pps_two_ticks_ok(s):
     return (tt0, n0), (tt1, n1), (n1 == n0 + 1)
 
 def sync_time_using_update_telescope_time(snaps):
-    # Robust PPS-locked load; uses count_pps to ensure no PPS during compute:contentReference[oaicite:6]{index=6}
+    # Robust PPS-locked load; uses count_pps to ensure no PPS during compute
     concurrently(snaps, lambda s: s.sync.update_telescope_time())
     # Wait for the PPS edge that *performs* the load
     snaps[0].sync.get_tt_of_pps(wait_for_sync=True)
+    # Re-sync internal TT (which drives packet timestamps) on all boards
+    concurrently(snaps, lambda s: s.sync.update_internal_time())
 
 def verify(snaps):
-    periods = concurrently(snaps, lambda s: s.sync.period_pps())  # :contentReference[oaicite:7]{index=7}
-    lastpps = concurrently(snaps, lambda s: s.sync.get_tt_of_pps(wait_for_sync=False))
+    periods = concurrently(snaps, lambda s: s.sync.period_pps())
+    lastpps = concurrently(snaps, lambda s: s.sync.get_tt_of_pps(wait_for_sync=True))
+    # Check all boards saw the same PPS count
+    counts = [n for (tt, n) in lastpps]
+    if len(set(counts)) > 1:
+        LOGGER.warning("PPS counts differ across boards: %s", counts)
     return periods, lastpps
 
 # -----------------------------------------------------------------------------
@@ -347,7 +352,7 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--nchan-packet", type=int, default=None, help="Override common.nchan_packet")
     ap.add_argument("--do_sync", action="store_true", help="Do sync after configuring")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
-    ap.add_argument("--programmed", action="store_true", help="Program the SNAP before configuring")
+    ap.add_argument("--programmed", action="store_true", help="Skip CasperFpga pre-programming (board already programmed)")
     ap.add_argument("--test-mode", type=str, default=None, help="Test mode for the SNAP", 
     choices=["zeros", "noise", "counter"])
     ap.add_argument("--fft_shift", type=int, default=None, help="FFT shift for the SNAP")
@@ -437,8 +442,7 @@ def main() -> None:  # pragma: no cover
                 s.hostname, n, snaps[0].hostname, dclks, dclks / float(period),
             )
 
-    for snap in snaps:
-        snap.eth.enable_tx()
+    concurrently(snaps, lambda s: s.eth.enable_tx())
 
 if __name__ == "__main__":  # pragma: no cover
      main()
