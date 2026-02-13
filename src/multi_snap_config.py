@@ -322,12 +322,18 @@ def pps_two_ticks_ok(s):
     return (tt0, n0), (tt1, n1), (n1 == n0 + 1)
 
 def sync_time_using_update_telescope_time(snaps):
-    # Robust PPS-locked load; uses count_pps to ensure no PPS during compute
-    concurrently(snaps, lambda s: s.sync.update_telescope_time())
-    # Wait for the PPS edge that *performs* the load
-    snaps[0].sync.get_tt_of_pps(wait_for_sync=True)
-    # Re-sync internal TT (which drives packet timestamps) on all boards
-    concurrently(snaps, lambda s: s.sync.update_internal_time())
+      # Ensure sync loopback and output rate are configured
+      concurrently(snaps, lambda s: s.sync.set_output_sync_rate(0xe0000000))
+      concurrently(snaps, lambda s: s.sync.enable_loopback())
+      # Robust PPS-locked load; uses count_pps to ensure no PPS during compute
+      concurrently(snaps, lambda s: s.sync.update_telescope_time())
+      # Wait for the PPS edge that *performs* the load
+      snaps[0].sync.get_tt_of_pps(wait_for_sync=True)
+      # Wait for sync pulses to stabilize (need 2 periods for firmware to measure period)
+      snaps[0].sync.wait_for_sync()
+      snaps[0].sync.wait_for_sync()
+      # Re-sync internal TT (which drives packet timestamps) on all boards
+      concurrently(snaps, lambda s: s.sync.update_internal_time())
 
 def verify(snaps):
     periods = concurrently(snaps, lambda s: s.sync.period_pps())
