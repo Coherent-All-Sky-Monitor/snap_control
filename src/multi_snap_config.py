@@ -323,7 +323,7 @@ def pps_two_ticks_ok(s):
     tt1, n1 = s.sync.get_tt_of_pps(wait_for_sync=True)
     return (tt0, n0), (tt1, n1), (n1 == n0 + 1)
 
-def sync_time_using_update_telescope_time(snaps):
+def sync_time_using_update_telescope_time_old(snaps):
       # Ensure sync loopback and output rate are configured
       concurrently(snaps, lambda s: s.sync.set_output_sync_rate(0xe0000000))
       concurrently(snaps, lambda s: s.sync.enable_loopback())
@@ -336,6 +336,18 @@ def sync_time_using_update_telescope_time(snaps):
       snaps[0].sync.wait_for_sync()
       # Re-sync internal TT (which drives packet timestamps) on all boards
       concurrently(snaps, lambda s: s.sync.update_internal_time())
+
+def sync_time_using_update_telescope_time(snaps):
+    concurrently(snaps, lambda s: s.sync.set_output_sync_rate(0xe0000000))
+    concurrently(snaps, lambda s: s.sync.enable_loopback())
+    concurrently(snaps, lambda s: s.sync.update_telescope_time())
+    snaps[0].sync.get_tt_of_pps(wait_for_sync=True)
+    snaps[0].sync.wait_for_sync()
+    snaps[0].sync.wait_for_sync()
+    concurrently(snaps, lambda s: s.sync.update_internal_time())
+    # Reset DSP pipelines simultaneously on next sync
+    concurrently(snaps, lambda s: s.sync.arm_sync(wait_for_sync=True))
+    snaps[0].sync.wait_for_sync()
 
 def verify(snaps):
     periods = concurrently(snaps, lambda s: s.sync.period_pps())
